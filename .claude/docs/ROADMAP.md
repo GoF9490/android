@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 2 진행 중 (7/28 Tasks 완료)
+**📊 진행 상황**: Phase 2 진행 중 (8/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -104,7 +104,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §4.3
   - 주의: [검토] 로그아웃이 목록·재생 상태를 건드리지 않는지 확인(PRD: 목록·재생은 유지).
 
-- **Task 008: 로그인 진입과 딥링크 수신**
+- **Task 008: 로그인 진입과 딥링크 수신** ✅
   - 📋 `feature/auth/LoginDialog.kt`: `"Sign with Google"` 버튼 하나를 가진 다이얼로그
   - 📋 `feature/auth/LoginLauncher.kt`: `CustomTabsIntent`로 `{BASE_URL}/oauth2/authorization/google?redirect_uri=musicapp%3A%2F%2Foauth2%2Fcallback` 열기
   - 📋 `feature/auth/DeepLinkParser.kt`: `musicapp://oauth2/callback` URI에서 `token` / `error` / 없음 구분(순수 함수 + 단위 테스트)

@@ -1,6 +1,7 @@
 package com.example.musicapp
 
 import android.graphics.Color
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -10,6 +11,11 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.musicapp.feature.auth.AuthViewModel
+import com.example.musicapp.feature.auth.DeepLinkResult
+import com.example.musicapp.feature.auth.parseDeepLink
+import com.example.musicapp.ui.MessageKind
+import com.example.musicapp.ui.UiMessage
+import com.example.musicapp.ui.getLoginErrorMessage
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -41,6 +47,8 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
+        // 프로세스 재생성 시에는 이미 처리한 딥링크일 수 있으므로 처음 생성될 때만 처리한다
+        if (savedInstanceState == null) handleDeepLink(intent)
         setContent {
             MusicAppTheme {
                 MainScreen(messageBus = messageBus) { padding ->
@@ -48,6 +56,32 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.fillMaxSize().padding(padding))
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    /** 로그인 콜백 딥링크를 처리한다. 토큰·URI는 로그에 남기지 않는다(PRD §4.2). */
+    private fun handleDeepLink(intent: Intent?) {
+        val uri = intent?.data ?: return
+        val result = parseDeepLink(
+            scheme = uri.scheme,
+            host = uri.host,
+            path = uri.path,
+            token = uri.getQueryParameter("token"),
+            error = uri.getQueryParameter("error"),
+        )
+        // 값을 꺼낸 직후 data를 비워 회전·재생성 시 재처리를 막는다
+        intent.data = null
+        when (result) {
+            is DeepLinkResult.Token -> authViewModel.handleLogin(result.token)
+            is DeepLinkResult.Error ->
+                messageBus.post(UiMessage("login-error", getLoginErrorMessage(result.code), MessageKind.ERROR))
+            DeepLinkResult.None -> Unit
         }
     }
 }
