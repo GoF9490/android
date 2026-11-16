@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 1 진행 중 (3/28 Tasks 완료)
+**📊 진행 상황**: Phase 1 진행 중 (4/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -62,7 +62,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §3.4, §4.4 / API.md §5
   - 주의: [구현] 문구는 PRD 표와 글자 단위로 같아야 한다(웹과 통일). 서버 `message`는 `ApiException`에 담지 않는다.
 
-- **Task 004: 네트워크 모듈 (Hilt)**
+- **Task 004: 네트워크 모듈 (Hilt)** ✅
   - 📋 `di/NetworkModule.kt`: `OkHttpClient`, `Retrofit`(`BuildConfig.BASE_URL`, kotlinx.serialization 컨버터), `MusicApi` 제공. 기본 타임아웃 30초
   - 📋 `data/api/RetryInterceptor.kt`: GET 요청만 5xx·`IOException`에 최대 2회 재시도, 4xx와 POST는 재시도하지 않음
   - 📋 Coil `ImageLoader`를 같은 `OkHttpClient` 계열로 구성(`MusicApp`에 `SingletonImageLoader.Factory` 또는 Hilt 제공)
