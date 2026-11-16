@@ -10,10 +10,10 @@ PRD §18의 **A0(환경·골격) 단계가 거의 끝났다.** Android Studio·S
 
 ## 문서 체계 (`.claude/docs/`)
 
-- **`PRD.md`가 유일한 기준 문서**다. `PRD-03.md`(초안)를 대체하며 달라진 점은 PRD §16에 있다. 작업 전에 해당 절을 읽는다.
-- 우선순위: `API.md`(백엔드 API 명세) > `PRD-05.md`(백엔드) > `PRD-04.md`(Nginx) > `PRD.md` > `PRD-03.md`. 충돌이 보이면 임의로 판단하지 말고 사용자에게 확인한 뒤 PRD §16에 기록한다.
-- `PRD-01`~`PRD-07` 머리말의 "`PRD.md` §7"은 이 문서가 아니라 **구 백엔드 인덱스**를 뜻한다. 백엔드 규칙을 이 저장소에 적용하지 않는다.
-- `PRD-frontend.md`는 웹 클라이언트의 확정 결정(특히 §3.4 에러 문구, §4.4 로그인 오류, §16 결정 이력)으로, 앱이 웹과 같은 동작·문구를 따를 때 참조한다.
+- 이 저장소의 문서는 `PRD.md`(Android 기준 문서)와 `API.md`(백엔드 API 명세) 두 개뿐이다. 작업 전에 `PRD.md`의 해당 절을 읽는다. 초안 `PRD-03`을 대체하며 달라진 점은 PRD §16에 있다.
+- 우선순위: `API.md` > `PRD.md`. 충돌이 보이면 임의로 판단하지 말고 사용자에게 확인한 뒤 PRD §16에 기록한다. 더 확인이 필요하면 `../backend/music`(백엔드 구현)과 `../nginx/.claude/docs/`(인프라 문서)를 읽기만 한다.
+- `PRD-01`~`PRD-07`·`PRD-frontend.md`는 이 저장소에서 삭제했다(2026-11-16). 사본은 `../nginx/.claude/docs/`·`../frontend/.claude/docs/`에, 원문은 git 기록(커밋 `b556e91`)에 있다. 그 문서 머리말의 "`PRD.md` §7"은 구 백엔드 인덱스를 뜻하며 이 저장소와 무관하다.
+- 앱이 웹과 같은 동작·문구를 따를 때는 웹 PRD(`../frontend/.claude/docs/PRD.md`)를 읽기만 한다(§3.4 에러 문구, §4.4 로그인 오류, §16 결정 이력).
 - `ROADMAP.md`는 아직 없다. PRD §18 완료 후 `write-roadmap` 스킬로 작성하고, 이후 `scripts/run-roadmap.sh`(phase별로 `claude -p` 세션 순차 실행)와 `/docs:update-roadmap`을 쓴다.
 
 ## 명령
