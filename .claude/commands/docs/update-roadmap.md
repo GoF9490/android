@@ -28,8 +28,8 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 
 **Task 제목 업데이트:**
 
-- Before: `- **Task XXX: 작업명**`
-- After: `- **Task XXX: 작업명** ✅`
+- Before: `- **Task N-M: 작업명**`
+- After: `- **Task N-M: 작업명** ✅`
 
 **하위 항목:**
 
@@ -53,7 +53,7 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 
 1. 현재 ROADMAP.md 읽기
 2. 미완료 Task 목록 표시
-3. "어떤 Task를 완료했나요? (예: 004 또는 004,005)" 질문
+3. "어떤 Task를 완료했나요? (예: 1-4 또는 1-4,1-5)" 질문
 4. 사용자 입력 받기
 5. 해당 Task 제목에 ✅ 추가
 6. Phase 상태 자동 확인 및 업데이트
@@ -64,7 +64,7 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 
 ### Task 완료 체크 로직
 
-1. **Task 제목 찾기**: `- **Task XXX:` 패턴으로 검색
+1. **Task 제목 찾기**: `- **Task N-M:` 패턴(N = Phase 번호, M = Phase 안의 순번)으로 검색
 2. **이미 완료 확인**: 제목에 ✅가 있으면 건너뜀
 3. **제목 업데이트**: 제목 끝에 ✅ 추가 (하위 항목은 수정하지 않음)
 
@@ -77,7 +77,7 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 ### 진행 상황 계산
 
 ```
-전체 Task: 001~012 (12개)
+전체 Task: 1-1 ~ 마지막 Phase의 마지막 Task (예: 12개)
 완료 Task: ✅ 표시가 있는 Task 개수
 진행률: (완료 Task / 전체 Task) * 100
 ```
@@ -87,12 +87,12 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 **Before:**
 
 ```markdown
-- **Task 004: 공통 컴포넌트 라이브러리 구축**
+- **Task 1-4: 공통 컴포넌트 라이브러리 구축**
   - 📋 shadcn/ui 설치 및 설정
   - 📋 기본 UI 컴포넌트 추가
   - 📋 더미 견적서 데이터 생성 유틸리티
   - 완료 기준: 공통 컴포넌트가 예시 페이지에서 렌더링되고 빌드가 통과한다
-  - 의존: Task 003
+  - 의존: Task 1-3
   - 관련 PRD: PRD.md 3.2 공통 UI
   - 주의: [구현] 컴포넌트는 props 타입을 명시할 것
 
@@ -103,12 +103,12 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 **After:**
 
 ```markdown
-- **Task 004: 공통 컴포넌트 라이브러리 구축** ✅
+- **Task 1-4: 공통 컴포넌트 라이브러리 구축** ✅
   - 📋 shadcn/ui 설치 및 설정
   - 📋 기본 UI 컴포넌트 추가
   - 📋 더미 견적서 데이터 생성 유틸리티
   - 완료 기준: 공통 컴포넌트가 예시 페이지에서 렌더링되고 빌드가 통과한다
-  - 의존: Task 003
+  - 의존: Task 1-3
   - 관련 PRD: PRD.md 3.2 공통 UI
   - 주의: [구현] 컴포넌트는 props 타입을 명시할 것
 
@@ -118,11 +118,11 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 
 ## 주의사항
 
-- Task 번호는 3자리 숫자 형식 (001, 002, 003...)
+- Task 번호는 `{Phase}-{순번}` 형식 (1-1, 1-2, 2-1...)이며, 순번은 각 Phase 안에서 1부터 시작한다. `Task 001` 같은 평탄 번호는 쓰지 않는다. ROADMAP.md에 옛 형식이 남아 있으면 먼저 Phase 제목 아래 나열 순서대로 새 형식으로 바꿀지 사용자에게 확인한다.
 - 이미 완료된(✅ 표시가 있는) Task는 건너뜀
 - Phase 전체 완료 시 Phase 제목에도 ✅ 추가
 - 날짜는 YYYY-MM-DD 형식 사용
-- 여러 Task 동시 완료 지원 (004,005,006)
+- 여러 Task 동시 완료 지원 (1-4,1-5,2-1)
 
 ## 스마트 기능
 
@@ -146,13 +146,13 @@ allowed-tools: ['Read(.claude/docs/ROADMAP.md:*)', 'Edit(.claude/docs/ROADMAP.md
 
 # 출력 예시:
 현재 미완료 Task 목록:
-- Task 004: 공통 컴포넌트 라이브러리 구축
-- Task 005: 견적서 조회 페이지 UI 구현
-- Task 006: 에러 및 로딩 상태 UI 구현
+- Task 1-4: 공통 컴포넌트 라이브러리 구축
+- Task 1-5: 견적서 조회 페이지 UI 구현
+- Task 2-1: 에러 및 로딩 상태 UI 구현
 ...
 
-어떤 Task를 완료했나요? (예: 004 또는 004,005): 004
+어떤 Task를 완료했나요? (예: 1-4 또는 1-4,1-5): 1-4
 
-✅ Task 004 완료 체크 완료!
+✅ Task 1-4 완료 체크 완료!
 📊 진행 상황: 4/12 Tasks 완료 (33%)
 ```
