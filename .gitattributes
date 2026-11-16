@@ -1,2 +1,7 @@
 # 쉘 스크립트는 항상 LF로 유지 (CRLF면 bash에서 오류 발생)
 *.sh text eol=lf
+
+# gradlew.bat은 CRLF 유지, 나머지 텍스트는 LF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.jar binary

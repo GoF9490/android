@@ -1,2 +1,13 @@
-.claude/*
+.claude/skills/*
+.claude/rules/*
 scripts/*
+# Android / Gradle
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+*.apk
+*.aab
+captures/
+.cxx/
