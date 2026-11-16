@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 2 진행 중 (6/28 Tasks 완료)
+**📊 진행 상황**: Phase 2 진행 중 (7/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -94,7 +94,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §4.3
   - 주의: [구현] 인터셉터는 동기 컨텍스트이므로 토큰을 메모리에 캐시해 읽는다(매 요청 `runBlocking`으로 DataStore를 읽지 않는다). [검토] 토큰이 로그·`toString()`에 노출되지 않는지 확인.
 
-- **Task 007: 인증 상태 관리**
+- **Task 007: 인증 상태 관리** ✅
   - 📋 `data/auth/AuthRepository.kt`: `login(token)`(저장 → `/me` 조회), `logout()`(토큰 삭제), `refreshUser()`. 상태는 `StateFlow<AuthState>`(`Loading` / `LoggedOut` / `LoggedIn(user)`)
   - 📋 규칙 구현: 앱 기동 시 토큰이 있으면 `/me` 호출 / 이미 만료된 토큰이면 `/me` 없이 조용히 로그아웃 / `/me`가 401이면 토큰 삭제 + `UNAUTHORIZED` 스낵바 1회 / 5xx·네트워크 실패면 토큰 유지하고 `LoggedOut` 표시
   - 📋 `feature/auth/AuthViewModel.kt`: 상태 노출, 로그아웃 액션, 포그라운드 복귀 시 재조회 트리거

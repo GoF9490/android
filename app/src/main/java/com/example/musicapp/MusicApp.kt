@@ -4,6 +4,7 @@ import android.app.Application
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import com.example.musicapp.data.auth.AuthRepository
 import com.example.musicapp.data.auth.TokenStore
 import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
@@ -23,10 +24,17 @@ class MusicApp : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var tokenStore: Lazy<TokenStore>
 
+    @Inject
+    lateinit var authRepository: Lazy<AuthRepository>
+
     override fun onCreate() {
         super.onCreate()
         // 첫 API 요청 지연을 줄이기 위해 토큰 캐시를 백그라운드에서 미리 로드한다
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch { tokenStore.get().awaitToken() }
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            tokenStore.get().awaitToken()
+            // 저장된 토큰으로 사용자 조회(인증 상태 초기화)
+            authRepository.get().initialize()
+        }
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader = imageLoader.get()

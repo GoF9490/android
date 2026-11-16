@@ -494,6 +494,7 @@ android/
 | 29 | 스낵바 표시 정책 미정 | **`MessageBus`(Hilt 싱글턴)가 순차 표시, 표시 시간 `Short`, 액션·닫기 버튼 없음. 같은 id가 대기·표시 중이면 중복 발행을 무시하고 표시가 끝나면(취소 포함) 다시 허용. 회전·프로세스 재생성 시 표시 중이던 메시지는 유실(MVP 수용). SUCCESS·ERROR는 아이콘 + 텍스트** | 같은 오류의 연속 스낵바 방지, 색만으로 상태를 전달하지 않음 (Task 005) |
 | 30 | M3 스킴 밖 색(warning, success) 접근 방식 미정 | **`MaterialTheme.extendedColors`(`ExtendedColors`, CompositionLocal)로 접근**, `onPrimary`는 흰색으로 명시 | 팔레트 상수를 직접 import하지 않고 테마 한 곳으로 통일 (Task 005) |
 | 31 | `Authorization` 부착 조건·토큰 캐시·`exp` 처리 세부 미정 | **`AuthInterceptor`는 요청 호스트와 포트가 `BASE_URL`과 같을 때만 Bearer 부착(스킴 무시, 이미 `Authorization`이 있으면 유지). `TokenStore`는 DataStore + 메모리 캐시(로드·쓰기를 Mutex로 직렬화, 로드 전 최초 1회만 `runBlocking` 허용, 앱 시작 시 `MusicApp`이 미리 로드). `JwtParser`는 해석 불가·`exp` 없음을 만료로 취급(시계 보정 없음, `exp <= now`면 만료)** | 포트가 다른 서버로 토큰이 새지 않게 하고, 첫 요청이 캐시 로드보다 빨라도 토큰이 누락되지 않게 함 (Task 006) |
+| 32 | 인증 상태 전이의 세부(재조회 실패, 401 외 4xx, 스낵바 id, 의존 방향) 미정 | **`/me`가 401일 때만 토큰 삭제 + `UNAUTHORIZED` 스낵바(id=`ErrorCode.UNAUTHORIZED.name`)이고, 401 외 4xx·5xx·네트워크 실패는 토큰을 유지한 채 `LoggedOut`. `LoggedIn` 상태의 포그라운드 재조회는 토큰 만료만 점검하고 `/me`를 부르지 않아 일시 장애로 강등되지 않음. `AuthRepository`가 `MessageBus`에 직접 의존하며 모든 상태 변경을 한 Mutex로 직렬화. 포그라운드 복귀는 `MainActivity` ON_START에서 `Loading`이 아닐 때만 재조회** | 연속 401의 스낵바 중복 방지, 이미 확인된 사용자를 일시 장애로 로그아웃 표시하지 않음 (Task 007) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
