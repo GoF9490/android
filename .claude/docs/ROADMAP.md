@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 1 진행 중 (1/28 Tasks 완료)
+**📊 진행 상황**: Phase 1 진행 중 (2/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -26,7 +26,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ## 미결정 사항
 
-- 알 수 없는 `status` 값(서버가 enum을 추가한 경우)의 처리 방식. PRD §3.3이 "구현 시 결정"으로 남겼다. → Task 002 (결재 필요)
+- ~~알 수 없는 `status` 값 처리~~ → 결정됨(2026-11-17): `TrackStatus.UNKNOWN` 추가, UI는 일반 오류 취급(PRD §16 #26). Task 011·012·019의 `when (status)`에는 `UNKNOWN` 분기나 `else`가 필요하다.
 - 앱 아이콘 디자인. 현재 아이콘이 없어 lint 경고(`MissingApplicationIcon`)가 난다. → Task 026 (결재 필요)
 - `DownloadManager`가 응답의 `Content-Disposition` 파일명을 적용하는지. 실측 후 저장 파일명 지정 방식을 정한다. → Task 023
 - 실제 Google 계정 로그인과 실기기 검증은 사용자만 할 수 있다. → Task 008의 최종 확인, Task 028 (결재 필요)
@@ -42,7 +42,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 의존: 없음
   - 관련 PRD: PRD.md §3.1, §6.1, §7.4
 
-- **Task 002: API 모델과 Retrofit 인터페이스**
+- **Task 002: API 모델과 Retrofit 인터페이스** ✅
   - 📋 `data/api/model/`: `TrackStatus`, `TrackResponse`, `TrackPageResponse`, `StreamPlayResponse`, `UserResponse`, `ErrorResponse` (PRD §3.3 코드 그대로, `@Serializable`)
   - 📋 `data/api/MusicApi.kt`: `getMe`, `getTracks(keyword?, page, size)`, `getTrack(trackId)`, `getPlayInfo(trackId)`, `uploadTrack(@Multipart parts)` — 모두 `suspend`. `keyword`가 null이면 쿼리를 보내지 않는다
   - 📋 `data/api/ApiJson.kt`: `Json { ignoreUnknownKeys = true; coerceInputValues = true }` 단일 인스턴스
@@ -50,7 +50,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 완료 기준: 예시 JSON 역직렬화 테스트가 통과하고 빌드가 성공한다.
   - 의존: 없음
   - 관련 PRD: PRD.md §3.2, §3.3 / API.md §3, §4
-  - 주의: [계획] 알 수 없는 `status` 값 처리(예: 별도 `UNKNOWN` 값 추가, `FAILED`로 간주)는 미결정이다. 결재 필요. 결정 전에는 임의 기본값을 넣지 않는다. [구현] `/download`는 Retrofit 메서드로 만들지 않는다(Task 023에서 `DownloadManager`가 URL로 직접 요청).
+  - 주의: [결정됨] 알 수 없는 `status`는 `TrackStatus.UNKNOWN`으로 매핑한다(PRD §16 #26). [구현] `/download`는 Retrofit 메서드로 만들지 않는다(Task 023에서 `DownloadManager`가 URL로 직접 요청).
 
 - **Task 003: 에러 정규화와 사용자 메시지 매핑**
   - 📋 `data/api/ApiException.kt`: `ApiException(status: Int, code: ErrorCode)`와 `ErrorCode` enum(API.md §5의 8개 + `NETWORK_ERROR`)

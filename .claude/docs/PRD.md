@@ -89,7 +89,7 @@
 ### 3.3. 모델 (`data/api/model`)
 
 ```kotlin
-@Serializable enum class TrackStatus { PENDING, PROCESSING, READY, FAILED }
+@Serializable enum class TrackStatus { PENDING, PROCESSING, READY, FAILED, UNKNOWN }  // UNKNOWN은 클라이언트 전용
 
 @Serializable
 data class TrackResponse(
@@ -98,7 +98,7 @@ data class TrackResponse(
     val artist: String,
     val album: String? = null,
     val durationSeconds: Int,
-    val status: TrackStatus,
+    val status: TrackStatus = TrackStatus.UNKNOWN,  // 기본값이 있어야 coerceInputValues가 동작
     val artworkUrl: String? = null,
     val originalFilename: String,
     val fileExtension: String,        // mp3 | wav | flac | m4a
@@ -131,7 +131,7 @@ data class UserResponse(
 data class ErrorResponse(val code: String, val message: String, val timestamp: String)
 ```
 
-* `Json { ignoreUnknownKeys = true; coerceInputValues = true }`로 서버 필드 추가에 견딥니다. 알 수 없는 `status` 값의 처리(예: `FAILED`로 간주)는 구현 시 정해 §16에 기록합니다.
+* `Json { ignoreUnknownKeys = true; coerceInputValues = true }`로 서버 필드 추가에 견딥니다. 알 수 없는 `status` 값(또는 누락)은 `TrackStatus.UNKNOWN`으로 매핑하며(§16 #26), UI에서는 일반 오류로 취급하고 `when` 분기에 `UNKNOWN`(또는 `else`)을 반드시 둡니다.
 * 서버 `message`는 그대로 노출하지 않고 아래 **클라이언트 메시지**를 씁니다. 알 수 없는 `code`는 `INTERNAL_ERROR`와 같이 처리합니다.
 
 ### 3.4. 에러 → 사용자 메시지 매핑
@@ -488,6 +488,7 @@ android/
 | 23 | `formatDuration` 음수 입력 미정의 | **`0:00`으로 처리** (`formatClock`과 같은 방어) | 서버 값이 음수일 일은 없으나 방어 (Task 001) |
 | 24 | 절대 URL 판별 기준 미정 | **`http://`·`https://` 접두사를 대소문자 무시로 판별** | 상대경로면 `BASE_URL` 결합, 절대 URL은 그대로 (Task 001) |
 | 25 | 시간 포맷 함수 시그니처 미정 | **`formatDuration(seconds: Int)`, `formatClock(ms: Long)`** | `durationSeconds`가 `Int`(§3.3), 플레이어 위치는 ms (Task 001) |
+| 26 | 알 수 없는 `status` 처리 미정 | **`TrackStatus.UNKNOWN` 추가, `status` 기본값 `UNKNOWN` + `coerceInputValues`로 매핑**, UI는 일반 오류 취급(후속 Task) | 서버가 enum을 추가해도 역직렬화가 실패하지 않고 `FAILED`로 오인하지 않음 (Task 002, 사용자 확정) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
