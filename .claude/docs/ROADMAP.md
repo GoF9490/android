@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 1 진행 중 (2/28 Tasks 완료)
+**📊 진행 상황**: Phase 1 진행 중 (3/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -52,7 +52,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §3.2, §3.3 / API.md §3, §4
   - 주의: [결정됨] 알 수 없는 `status`는 `TrackStatus.UNKNOWN`으로 매핑한다(PRD §16 #26). [구현] `/download`는 Retrofit 메서드로 만들지 않는다(Task 023에서 `DownloadManager`가 URL로 직접 요청).
 
-- **Task 003: 에러 정규화와 사용자 메시지 매핑**
+- **Task 003: 에러 정규화와 사용자 메시지 매핑** ✅
   - 📋 `data/api/ApiException.kt`: `ApiException(status: Int, code: ErrorCode)`와 `ErrorCode` enum(API.md §5의 8개 + `NETWORK_ERROR`)
   - 📋 `data/api/ErrorNormalizer.kt`: `Throwable` → `ApiException` 변환. `HttpException` 본문이 `ErrorResponse` JSON이면 `code` 사용, 아니면(Nginx HTML 등) 상태로 추정(`413 → PAYLOAD_TOO_LARGE`, 그 외 4xx → `INVALID_REQUEST`, 5xx → `INTERNAL_ERROR`), 알 수 없는 `code`는 `INTERNAL_ERROR`, `IOException`은 `NETWORK_ERROR`. `CancellationException`은 변환하지 않고 그대로 던진다
   - 📋 `ui/ErrorMessages.kt`: `ErrorCode` → 문구(PRD §3.4 표), 재생 오류 문구, 로그인 오류 코드 → 문구(PRD §4.4 표, 모르는 코드는 `login_failed` 문구)

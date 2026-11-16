@@ -489,6 +489,7 @@ android/
 | 24 | 절대 URL 판별 기준 미정 | **`http://`·`https://` 접두사를 대소문자 무시로 판별** | 상대경로면 `BASE_URL` 결합, 절대 URL은 그대로 (Task 001) |
 | 25 | 시간 포맷 함수 시그니처 미정 | **`formatDuration(seconds: Int)`, `formatClock(ms: Long)`** | `durationSeconds`가 `Int`(§3.3), 플레이어 위치는 ms (Task 001) |
 | 26 | 알 수 없는 `status` 처리 미정 | **`TrackStatus.UNKNOWN` 추가, `status` 기본값 `UNKNOWN` + `coerceInputValues`로 매핑**, UI는 일반 오류 취급(후속 Task) | 서버가 enum을 추가해도 역직렬화가 실패하지 않고 `FAILED`로 오인하지 않음 (Task 002, 사용자 확정) |
+| 27 | `ApiException.status` 타입 미정 | **`Int?`** (네트워크 오류는 `null`), 서버 `message`는 담지 않음. 알 수 없는 Throwable → `INTERNAL_ERROR`, `ErrorResponse` 파싱 실패(필드 누락 포함)는 상태 코드 추정 폴백 | 네트워크 오류에는 HTTP 상태가 없음 (Task 003) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
