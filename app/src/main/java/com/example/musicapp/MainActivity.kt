@@ -10,7 +10,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.musicapp.feature.auth.AuthAction
 import com.example.musicapp.feature.auth.AuthViewModel
+import com.example.musicapp.feature.auth.launchLogin
 import com.example.musicapp.feature.auth.DeepLinkResult
 import com.example.musicapp.feature.auth.parseDeepLink
 import com.example.musicapp.ui.MessageKind
@@ -51,7 +56,20 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) handleDeepLink(intent)
         setContent {
             MusicAppTheme {
-                MainScreen(messageBus = messageBus) { padding ->
+                val authState by authViewModel.authState.collectAsStateWithLifecycle()
+                MainScreen(
+                    messageBus = messageBus,
+                    topBar = {
+                        // 이후 Task 011에서 검색창(weight 1f)으로 대체한다
+                        Spacer(Modifier.weight(1f))
+                        AuthAction(
+                            authState = authState,
+                            onLoginClick = ::handleLoginClick,
+                            onUploadClick = {}, // Task 016에서 업로드 다이얼로그 연결
+                            onLogoutClick = authViewModel::handleLogout,
+                        )
+                    },
+                ) { padding ->
                     // 본문 슬롯: 이후 Task에서 트랙 목록으로 채운다
                     Box(modifier = Modifier.fillMaxSize().padding(padding))
                 }
@@ -63,6 +81,13 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleDeepLink(intent)
+    }
+
+    /** Activity 컨텍스트로 Custom Tab을 열어 콜백이 같은 태스크의 singleTop MainActivity로 돌아오게 한다. */
+    private fun handleLoginClick() {
+        launchLogin(this, BuildConfig.BASE_URL) {
+            messageBus.post(UiMessage("login-no-browser", getLoginErrorMessage(null), MessageKind.ERROR))
+        }
     }
 
     /** 로그인 콜백 딥링크를 처리한다. 토큰·URI는 로그에 남기지 않는다(PRD §4.2). */

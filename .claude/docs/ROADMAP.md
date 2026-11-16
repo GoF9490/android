@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 2 진행 중 (8/28 Tasks 완료)
+**📊 진행 상황**: Phase 3 대기 (9/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -82,7 +82,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §9.1, §9.2, §9.3
   - 주의: [구현] `accent`(#FF0000)는 텍스트 색으로 쓰지 않는다. 시스템 바 inset(edge-to-edge)을 `Scaffold` 패딩으로 처리한다.
 
-### Phase 2: 인증
+### Phase 2: 인증 ✅
 
 - **Task 006: 토큰 저장과 인증 인터셉터** ✅
   - 📋 `data/auth/TokenStore.kt`: DataStore(Preferences)에 JWT 저장·조회(`Flow<String?>`)·삭제. `di/StorageModule.kt`로 `DataStore` 제공
@@ -115,7 +115,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §4.1, §4.2, §4.4, §12.3 / API.md §3.1
   - 주의: [탐색] Manifest의 딥링크 intent-filter와 `singleTop`은 이미 있다. [구현] `redirect_uri`는 백엔드 화이트리스트와 문자열 완전 일치여야 한다. 토큰·URI를 로그에 남기지 않는다. [검토] 실제 Google 계정으로 로그인해 토큰이 돌아오는 전체 흐름은 사용자만 확인할 수 있다. 결재 필요(확인 전까지 "미확인"으로 보고).
 
-- **Task 009: 상단바 로그인 버튼·아바타·프로필 메뉴**
+- **Task 009: 상단바 로그인 버튼·아바타·프로필 메뉴** ✅
   - 📋 `feature/auth/AuthAction.kt`: 비로그인이면 `[로그인]` 버튼(누르면 `LoginDialog`), 로그인이면 `profileImageUrl` 원형 아바타(null이면 기본 아이콘)
   - 📋 `feature/auth/ProfileMenu.kt`: 아바타를 누르면 `DropdownMenu`에 `업로드`, `로그아웃`. `업로드`는 콜백만 노출(다이얼로그 연결은 Task 016)
   - 📋 `MainScreen` 상단바 우측 슬롯에 연결
