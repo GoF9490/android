@@ -485,6 +485,9 @@ android/
 | 20 | AGP·Kotlin 버전 미정 | **AGP 9.5.1 + 내장 Kotlin**(kotlin-android 플러그인 미사용), `compileSdk`·`targetSdk` 37 | 설치된 SDK(Platform 37.0)와 최신 안정판에 맞춤 (A0, 2026-11-16) |
 | 21 | 백업 설정 없음 | `allowBackup=false` + `dataExtractionRules`로 앱 데이터(토큰) 클라우드 백업·기기 이전 제외 | JWT가 저장되는 DataStore가 백업에 실리지 않게 함 (A0) |
 | 22 | `sdkmanager` 사용 안내 | `sdkmanager`는 deprecated(Android CLI로 위임, 사용 통계 수집 안내가 나옴). 필요하면 `--no-metrics` 사용 | cmdline-tools 23.0.0 확인 시 경고 확인 (A0) |
+| 23 | `formatDuration` 음수 입력 미정의 | **`0:00`으로 처리** (`formatClock`과 같은 방어) | 서버 값이 음수일 일은 없으나 방어 (Task 001) |
+| 24 | 절대 URL 판별 기준 미정 | **`http://`·`https://` 접두사를 대소문자 무시로 판별** | 상대경로면 `BASE_URL` 결합, 절대 URL은 그대로 (Task 001) |
+| 25 | 시간 포맷 함수 시그니처 미정 | **`formatDuration(seconds: Int)`, `formatClock(ms: Long)`** | `durationSeconds`가 `Int`(§3.3), 플레이어 위치는 ms (Task 001) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 

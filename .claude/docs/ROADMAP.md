@@ -34,7 +34,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 1: 기반 코드
 
-- **Task 001: 공통 유틸과 단위 테스트 기반**
+- **Task 001: 공통 유틸과 단위 테스트 기반** ✅
   - 📋 `util/TimeFormat.kt`: `formatDuration(seconds)`(목록용 `m:ss`, 1시간 이상 `h:mm:ss`), `formatClock(ms)`(플레이어용 `mm:ss`, 1시간 이상 `h:mm:ss`, 음수·비정상 값은 `00:00`)
   - 📋 `util/MediaUrl.kt`: `resolveMediaUrl(baseUrl, url)` — `http://`·`https://`로 시작하면 그대로, 상대경로면 `baseUrl`과 결합(슬래시 중복·누락 처리)
   - 📋 두 유틸의 단위 테스트 작성(경계값: 0초, 59초, 60초, 3599초, 3600초, 끝 슬래시 있는 baseUrl)
