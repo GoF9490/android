@@ -8,7 +8,8 @@
   },
   "model": "opusplan",
   "enabledPlugins": {
-    "serena@anthropic-plugin-directory": true
+    "serena@anthropic-plugin-directory": true,
+    "android-cli@android-cli-plugin": true
   },
   "language": "Korean",
   "autoUpdatesChannel": "latest",

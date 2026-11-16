@@ -14,7 +14,7 @@ PRD §18의 **A0(환경·골격) 단계가 거의 끝났다.** Android Studio·S
 - 우선순위: `API.md` > `PRD.md`. 충돌이 보이면 임의로 판단하지 말고 사용자에게 확인한 뒤 PRD §16에 기록한다. 더 확인이 필요하면 `../backend/music`(백엔드 구현)과 `../nginx/.claude/docs/`(인프라 문서)를 읽기만 한다.
 - `PRD-01`~`PRD-07`·`PRD-frontend.md`는 이 저장소에서 삭제했다(2026-11-16). 사본은 `../nginx/.claude/docs/`·`../frontend/.claude/docs/`에, 원문은 git 기록(커밋 `b556e91`)에 있다. 그 문서 머리말의 "`PRD.md` §7"은 구 백엔드 인덱스를 뜻하며 이 저장소와 무관하다.
 - 앱이 웹과 같은 동작·문구를 따를 때는 웹 PRD(`../frontend/.claude/docs/PRD.md`)를 읽기만 한다(§3.4 에러 문구, §4.4 로그인 오류, §16 결정 이력).
-- `ROADMAP.md`는 아직 없다. PRD §18 완료 후 `write-roadmap` 스킬로 작성하고, 이후 `scripts/run-roadmap.sh`(phase별로 `claude -p` 세션 순차 실행)와 `/docs:update-roadmap`을 쓴다.
+- **`ROADMAP.md`가 작업 순서와 완료 조건의 기준**이다(Phase 1~7, Task 28개, 상단에 모든 Task에 적용되는 공통 규칙과 미결정 사항). 의존 Task가 끝난 것부터 진행하고, 끝나면 `/docs:update-roadmap`으로 ✅ 표시한다. `scripts/run-roadmap.sh`는 Phase별로 `claude -p` 세션을 순차 실행하며, `.claude/agents/`의 서브 에이전트 정의(`android-core-developer`·`android-ui-developer`·`android-media-developer`·`android-qa-engineer`, 각 description에 기본 담당 Task 번호가 있다)를 Task별로 골라 쓴다.
 
 ## 명령
 
