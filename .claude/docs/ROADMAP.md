@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 1 진행 중 (4/28 Tasks 완료)
+**📊 진행 상황**: Phase 2 진행 중 (5/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -32,7 +32,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 - 실제 Google 계정 로그인과 실기기 검증은 사용자만 할 수 있다. → Task 008의 최종 확인, Task 028 (결재 필요)
 - 현재 브랜치는 `master`, 기본 브랜치 설정은 `main`이다. 원격에 올리기 전에 정리가 필요하다.
 
-### Phase 1: 기반 코드
+### Phase 1: 기반 코드 ✅
 
 - **Task 001: 공통 유틸과 단위 테스트 기반** ✅
   - 📋 `util/TimeFormat.kt`: `formatDuration(seconds)`(목록용 `m:ss`, 1시간 이상 `h:mm:ss`), `formatClock(ms)`(플레이어용 `mm:ss`, 1시간 이상 `h:mm:ss`, 음수·비정상 값은 `00:00`)
@@ -72,7 +72,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §3.4, §10
   - 주의: [구현] 인증 헤더는 여기서 붙이지 않는다(Task 006의 `AuthInterceptor`가 추가됨). 인터셉터 목록을 나중에 확장할 수 있게 구성한다. 로깅 인터셉터를 넣는다면 debug 전용이며 `Authorization` 헤더를 가린다(`redactHeader`).
 
-- **Task 005: 앱 셸과 공통 UI**
+- **Task 005: 앱 셸과 공통 UI** ✅
   - 📋 `ui/MessageHost.kt`: 앱 전역 스낵바 채널(`SnackbarHostState` + 메시지 발행용 `MessageBus`를 Hilt 싱글턴으로). 같은 id의 메시지는 중복 표시하지 않는다
   - 📋 `ui/MainScreen.kt`: `Scaffold` 기반 레이아웃 — 상단바 슬롯(검색창 + 우측 액션), 본문 슬롯, 하단 플레이어 슬롯, 스낵바 호스트. `MainActivity`가 이를 표시하도록 변경
   - 📋 `ui/components/Artwork.kt`: Coil로 앨범자켓을 표시하고 URL이 null이거나 로딩 실패면 음표 플레이스홀더를 보여 주는 컴포넌트(크기·모서리 반경 인자)

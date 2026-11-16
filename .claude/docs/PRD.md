@@ -491,6 +491,8 @@ android/
 | 26 | 알 수 없는 `status` 처리 미정 | **`TrackStatus.UNKNOWN` 추가, `status` 기본값 `UNKNOWN` + `coerceInputValues`로 매핑**, UI는 일반 오류 취급(후속 Task) | 서버가 enum을 추가해도 역직렬화가 실패하지 않고 `FAILED`로 오인하지 않음 (Task 002, 사용자 확정) |
 | 27 | `ApiException.status` 타입 미정 | **`Int?`** (네트워크 오류는 `null`), 서버 `message`는 담지 않음. 알 수 없는 Throwable → `INTERNAL_ERROR`, `ErrorResponse` 파싱 실패(필드 누락 포함)는 상태 코드 추정 폴백 | 네트워크 오류에는 HTTP 상태가 없음 (Task 003) |
 | 28 | 네트워크 클라이언트 세부 미정 | **`@Named("base")` 클라이언트(타임아웃 30초, `callTimeout` 없음, 인터셉터 없음)에서 API용 클라이언트를 `newBuilder()`로 파생. `RetryInterceptor`는 GET만 5xx·`IOException`에 2회, 재시도 간 300ms×시도횟수 선형 대기(생성자 주입). 로깅 인터셉터는 넣지 않음. Coil도 API 클라이언트를 공유(외부 호스트 `Authorization` 차단은 Task 006 `AuthInterceptor` 호스트 검사)** | 풀·디스패처 공유, 업로드 클라이언트(Task 014) 파생 용이, 토큰 로그 노출 방지 (Task 004) |
+| 29 | 스낵바 표시 정책 미정 | **`MessageBus`(Hilt 싱글턴)가 순차 표시, 표시 시간 `Short`, 액션·닫기 버튼 없음. 같은 id가 대기·표시 중이면 중복 발행을 무시하고 표시가 끝나면(취소 포함) 다시 허용. 회전·프로세스 재생성 시 표시 중이던 메시지는 유실(MVP 수용). SUCCESS·ERROR는 아이콘 + 텍스트** | 같은 오류의 연속 스낵바 방지, 색만으로 상태를 전달하지 않음 (Task 005) |
+| 30 | M3 스킴 밖 색(warning, success) 접근 방식 미정 | **`MaterialTheme.extendedColors`(`ExtendedColors`, CompositionLocal)로 접근**, `onPrimary`는 흰색으로 명시 | 팔레트 상수를 직접 import하지 않고 테마 한 곳으로 통일 (Task 005) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 

@@ -8,15 +8,19 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import com.example.musicapp.ui.MainScreen
+import com.example.musicapp.ui.MessageBus
 import com.example.musicapp.ui.theme.MusicAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var messageBus: MessageBus
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,15 +31,9 @@ class MainActivity : ComponentActivity() {
         )
         setContent {
             MusicAppTheme {
-                // A0 골격 확인용 화면: 서버 주소만 표시한다
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Re-dubb Music\n${BuildConfig.BASE_URL}",
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
+                MainScreen(messageBus = messageBus) { padding ->
+                    // 본문 슬롯: 이후 Task에서 트랙 목록으로 채운다
+                    Box(modifier = Modifier.fillMaxSize().padding(padding))
                 }
             }
         }
