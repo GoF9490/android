@@ -1,0 +1,16 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "UV_PYTHON": "3.12"
+  },
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "opusplan",
+  "enabledPlugins": {
+    "serena@anthropic-plugin-directory": true
+  },
+  "language": "Korean",
+  "autoUpdatesChannel": "latest",
+  "theme": "dark"
+}
