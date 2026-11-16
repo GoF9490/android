@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 2 진행 중 (5/28 Tasks 완료)
+**📊 진행 상황**: Phase 2 진행 중 (6/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -84,7 +84,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 2: 인증
 
-- **Task 006: 토큰 저장과 인증 인터셉터**
+- **Task 006: 토큰 저장과 인증 인터셉터** ✅
   - 📋 `data/auth/TokenStore.kt`: DataStore(Preferences)에 JWT 저장·조회(`Flow<String?>`)·삭제. `di/StorageModule.kt`로 `DataStore` 제공
   - 📋 `data/auth/JwtParser.kt`: payload의 `exp`(초)를 서명 검증 없이 디코드, `isExpired(token, now)` 제공. 형식이 깨진 토큰은 만료로 취급
   - 📋 `data/auth/AuthInterceptor.kt`: 토큰이 있고 요청 호스트가 `BASE_URL` 호스트와 같을 때만 `Authorization: Bearer` 부착. `NetworkModule`의 클라이언트에 연결

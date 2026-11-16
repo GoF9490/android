@@ -493,6 +493,7 @@ android/
 | 28 | 네트워크 클라이언트 세부 미정 | **`@Named("base")` 클라이언트(타임아웃 30초, `callTimeout` 없음, 인터셉터 없음)에서 API용 클라이언트를 `newBuilder()`로 파생. `RetryInterceptor`는 GET만 5xx·`IOException`에 2회, 재시도 간 300ms×시도횟수 선형 대기(생성자 주입). 로깅 인터셉터는 넣지 않음. Coil도 API 클라이언트를 공유(외부 호스트 `Authorization` 차단은 Task 006 `AuthInterceptor` 호스트 검사)** | 풀·디스패처 공유, 업로드 클라이언트(Task 014) 파생 용이, 토큰 로그 노출 방지 (Task 004) |
 | 29 | 스낵바 표시 정책 미정 | **`MessageBus`(Hilt 싱글턴)가 순차 표시, 표시 시간 `Short`, 액션·닫기 버튼 없음. 같은 id가 대기·표시 중이면 중복 발행을 무시하고 표시가 끝나면(취소 포함) 다시 허용. 회전·프로세스 재생성 시 표시 중이던 메시지는 유실(MVP 수용). SUCCESS·ERROR는 아이콘 + 텍스트** | 같은 오류의 연속 스낵바 방지, 색만으로 상태를 전달하지 않음 (Task 005) |
 | 30 | M3 스킴 밖 색(warning, success) 접근 방식 미정 | **`MaterialTheme.extendedColors`(`ExtendedColors`, CompositionLocal)로 접근**, `onPrimary`는 흰색으로 명시 | 팔레트 상수를 직접 import하지 않고 테마 한 곳으로 통일 (Task 005) |
+| 31 | `Authorization` 부착 조건·토큰 캐시·`exp` 처리 세부 미정 | **`AuthInterceptor`는 요청 호스트와 포트가 `BASE_URL`과 같을 때만 Bearer 부착(스킴 무시, 이미 `Authorization`이 있으면 유지). `TokenStore`는 DataStore + 메모리 캐시(로드·쓰기를 Mutex로 직렬화, 로드 전 최초 1회만 `runBlocking` 허용, 앱 시작 시 `MusicApp`이 미리 로드). `JwtParser`는 해석 불가·`exp` 없음을 만료로 취급(시계 보정 없음, `exp <= now`면 만료)** | 포트가 다른 서버로 토큰이 새지 않게 하고, 첫 요청이 캐시 로드보다 빨라도 토큰이 누락되지 않게 함 (Task 006) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 

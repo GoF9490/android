@@ -5,6 +5,8 @@ import com.example.musicapp.BuildConfig
 import com.example.musicapp.data.api.MusicApi
 import com.example.musicapp.data.api.RetryInterceptor
 import com.example.musicapp.data.api.apiJson
+import com.example.musicapp.data.auth.AuthInterceptor
+import com.example.musicapp.data.auth.TokenStore
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
@@ -18,6 +20,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -68,12 +71,18 @@ object NetworkModule {
 
     /**
      * API용 클라이언트(수식자 없음). 인터셉터는 이 한 곳에서 순서대로 추가한다.
-     * Task 006: AuthInterceptor를 RetryInterceptor보다 먼저 추가한다.
+     * AuthInterceptor를 RetryInterceptor보다 먼저 추가한다(재시도 요청도 같은 헤더를 재사용).
+     * 업로드 클라이언트(Task 014)도 이 클라이언트에서 파생하거나 같은 AuthInterceptor를 붙여야 한다.
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(@Named("base") base: OkHttpClient): OkHttpClient {
+    fun provideOkHttpClient(
+        @Named("base") base: OkHttpClient,
+        @Named("baseUrl") baseUrl: String,
+        tokenStore: TokenStore,
+    ): OkHttpClient {
         return base.newBuilder()
+            .addInterceptor(AuthInterceptor(baseUrl.toHttpUrl()) { tokenStore.getCachedToken() })
             .addInterceptor(RetryInterceptor())
             .build()
     }
@@ -92,7 +101,7 @@ object NetworkModule {
 
     /**
      * Coil도 API와 같은 클라이언트 계열을 쓴다.
-     * 외부 호스트에 Authorization이 붙지 않는 것은 Task 006의 AuthInterceptor 호스트 검사가 보장한다.
+     * 외부 호스트에 Authorization이 붙지 않는 것은 AuthInterceptor의 호스트·포트 검사가 보장한다.
      */
     @Provides
     @Singleton
