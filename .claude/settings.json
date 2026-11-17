@@ -13,5 +13,13 @@
   },
   "language": "Korean",
   "autoUpdatesChannel": "latest",
-  "theme": "dark"
+  "theme": "dark",
+  "autoMode": {
+    "environment": [
+      "**Primary use**: Android app development (Kotlin/Jetpack Compose client for the on-prem music streaming/archiving MVP 're-dubb'). Backend, nginx, and docker-compose live in sibling repos and are out of scope for this checkout.",
+      "**Trusted repo**: this local checkout (C:\\WorkSpace\\re-dubb\\android). No remote is configured, so there is no trusted remote destination; do not push or send code elsewhere.",
+      "**Routine in this repo**: `./gradlew` build/test/lint/install tasks, `adb` commands against an emulator, and `.claude/agents/` sub-agent invocations. Destructive `adb` commands (uninstall, `pm clear`, `shell rm`, `pull` of app data) against a physical device are not routine.",
+      "**Sensitive data**: JWT tokens and deep-link URIs must never be logged, placed in exception messages, or shown in test output."
+    ]
+  }
 }
