@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 5 진행 중 (21/28 Tasks 완료)
+**📊 진행 상황**: Phase 6 대기 (22/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -201,7 +201,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §5, §3.4, §9.3
   - 주의: [구현] 다이얼로그는 닫히면 상태가 초기화되어야 한다. 업로드는 ViewModel 범위에서 진행되어 화면 회전에 끊기지 않아야 한다. [검토] 로그인하지 않으면 업로드 진입점이 보이지 않는지 확인.
 
-### Phase 5: 플레이어
+### Phase 5: 플레이어 ✅
 
 - **Task 5-1: PlaybackService (백그라운드 재생 서비스)** ✅
   - 📋 `player/PlaybackService.kt`: `MediaSessionService` 구현. ExoPlayer 생성(`setAudioAttributes(…, handleAudioFocus = true)`, `setHandleAudioBecomingNoisy(true)`), `MediaSession` 발행, `onGetSession` 반환, `onTaskRemoved`에서 재생 중이 아니면 종료, `onDestroy`에서 player·session `release()`
@@ -253,7 +253,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §7.4, §9.3
   - 주의: [구현] 볼륨은 앱 내 `player.volume`이다. 시스템 미디어 볼륨을 바꾸지 않는다. 슬라이더에 접근성 상태 설명을 넣는다. [검토] 반복재생 시 `/play`가 호출되지 않는지 확인.
 
-- **Task 5-6: 알림 권한과 재생 오류 처리**
+- **Task 5-6: 알림 권한과 재생 오류 처리** ✅
   - 📋 Android 13+에서 첫 재생 시점에 `POST_NOTIFICATIONS` 런타임 권한 요청(한 번 거부하면 다시 묻지 않음, 거부해도 재생은 진행)
   - 📋 `onPlayerError` → 상태 `Error` + 재생 오류 스낵바(PRD §3.4). 오류 상태에서 같은 곡 재클릭은 재시작(Task 5-3 규칙과 연결 확인)
   - 📋 에뮬레이터 확인: 재생 중 홈 버튼·화면 끄기(`adb shell input keyevent 26`) 후에도 재생 유지, 알림창에 미디어 컨트롤 표시·동작, 앱을 최근 앱에서 지워도 동작이 PRD와 일치
