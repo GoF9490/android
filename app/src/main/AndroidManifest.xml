@@ -33,6 +33,14 @@
             </intent-filter>
         </activity>
 
-        <!-- PlaybackService(MediaSessionService)는 A4 단계에서 추가한다 -->
+        <!-- 백그라운드 재생 서비스. MediaController·시스템 미디어 UI가 바인딩하므로 exported -->
+        <service
+            android:name=".player.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
