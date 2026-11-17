@@ -2,8 +2,8 @@ package com.example.musicapp.feature.auth
 
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 
 /** 백엔드 화이트리스트와 문자열 완전 일치해야 하는, 이미 인코딩된 콜백 주소. */
 const val LOGIN_REDIRECT_URI = "musicapp%3A%2F%2Foauth2%2Fcallback"
@@ -18,7 +18,7 @@ fun buildLoginUrl(baseUrl: String): String =
  */
 fun launchLogin(context: Context, baseUrl: String, onNoBrowser: () -> Unit) {
     try {
-        CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(buildLoginUrl(baseUrl)))
+        CustomTabsIntent.Builder().build().launchUrl(context, buildLoginUrl(baseUrl).toUri())
     } catch (e: ActivityNotFoundException) {
         onNoBrowser()
     }

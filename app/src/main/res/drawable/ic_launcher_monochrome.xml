@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 임시 아이콘 음표 심볼 (Task 6-4) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M36,70 a9,6.5 -20 1,0 18,0 a9,6.5 -20 1,0 -18,0 z M52,70 h4 V36 h-4 z M56,36 C60,48 74,48 70,64 C68,54 62,52 56,50 z" />
+</vector>

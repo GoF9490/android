@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bg">#FF030303</color>
+    <!-- 임시 런처 아이콘 배경(Task 6-4) -->
+    <color name="ic_launcher_background">#FF121212</color>
 </resources>

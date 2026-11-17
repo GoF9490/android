@@ -516,6 +516,9 @@ android/
 | 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 | 52 | 프로세스 재생성 복원 범위 미정 | **검색어만 `SavedStateHandle`로 복원하고 목록은 저장하지 않고 재조회한다. 확장 플레이어·업로드 다이얼로그 열림은 `rememberSaveable`. 재생은 회전에서만 유지를 검증한다(서비스가 앱과 같은 프로세스). 곡 행 클릭에 `onClickLabel = "재생"`을 둔다** | Bundle 크기 제한, 접근성(Task 6-2) |
 | 53 | UI 테스트 의존성 추가 승인 | **`androidTestImplementation`에 `espresso-core` 3.7.0(안정판)을 버전 카탈로그로 추가. compose ui-test가 끌어오는 3.5.0이 API 37에서 `InputManager.getInstance` 반사 호출 실패(`NoSuchMethodException`)로 모든 UI 테스트가 깨졌기 때문. 그 외 테스트 의존성은 추가하지 않음** | 사용자 결재 2026-11-17 (Task 6-3) |
+| 54 | 앱 아이콘 디자인 미정(lint `MissingApplicationIcon`) | **임시 벡터 adaptive icon**(배경 `#121212`, 음표 `#FF0000`, monochrome 포함, API 26+ `mipmap-anydpi-v26`). 최종 디자인은 미정 | 사용자 결재 2026-11-17(Task 6-4). 의존성 없이 벡터 XML만 사용. README에 임시임을 명시 |
+| 55 | lint 경고 처리 방침 미정 | **`ExportedService`는 `tools:ignore`로 의도적 무시**(`PlaybackService`는 시스템 미디어 UI·블루투스·MediaController가 바인딩하므로 permission을 걸 수 없음). `InlinedApi`는 `requestNotificationPermissionOnce` 맨 앞에 SDK 33 미만 조기 반환 가드, `UseKtx`는 `toUri()`로 수정. `lintDebug` 경고 0건 | Task 6-4 승인(2026-11-17) |
+| 56 | `fullBackupContent` 없음(API 30 이하 자동 백업 규칙 부재) | **`backup_rules.xml`로 `file`·`database`·`sharedpref` 전체 제외**(`data_extraction_rules`와 동일). JWT가 든 DataStore가 백업·기기 이전에 들어가지 않는다 | PRD §14 토큰 보호, `allowBackup=false`와 이중 방어 (Task 6-4) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 

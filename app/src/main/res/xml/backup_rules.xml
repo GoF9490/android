@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 30 이하 자동 백업 규칙. JWT가 든 DataStore(files/datastore)를 포함한 앱 데이터를 모두 제외한다 -->
+<full-backup-content>
+    <exclude domain="file" path="." />
+    <exclude domain="database" path="." />
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>

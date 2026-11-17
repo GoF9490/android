@@ -4,9 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 현재 상태
 
-PRD §18의 **A0(환경·골격) 단계가 거의 끝났다.** Android Studio·SDK·에뮬레이터와 Gradle 프로젝트 골격(Compose·Hilt·Retrofit 등 의존성, 다크 테마, 빈 `MainActivity`)이 있고 `assembleDebug`·`installDebug`·`lintDebug`가 통과한다. 인증·목록·업로드·플레이어 등 기능 코드는 아직 없으며(A1~), 단위 테스트 소스도 아직 없다(`testDebugUnitTest`는 `NO-SOURCE`). 남은 A0 항목: `core` 공통 코드(`ApiException`·에러 정규화), 변경분 커밋.
+기능 구현은 ROADMAP Phase 1~6까지 끝났다. 남은 작업은 Task 7-1(에뮬레이터 통합 점검)과 Task 7-2(실기기 체크리스트와 사용자 검증)다.
 
-이 저장소는 온프레미스 음원 스트리밍·아카이빙 MVP("re-dubb")의 **Android 앱**만 다룬다. 백엔드(Spring)·Nginx·docker-compose는 `../backend`, `../docker-compose`, `../nginx` 소관이며 여기서 구현하지 않는다. 필요한 변경은 구현하지 않고 PRD §15에 요청 사항으로 기록한다. 디자인·동작 참고가 필요하면 `../frontend/`(React 웹, 읽기 전용)를 본다.
+- **구현 완료:** 공통 유틸·API 모델·Retrofit·에러 정규화·네트워크 모듈, 인증(토큰 저장·JWT 파서·`AuthInterceptor`·`AuthRepository`/ViewModel·로그인 다이얼로그·Custom Tabs·딥링크·상단바 아바타·프로필 메뉴), 트랙 목록·검색·무한 스크롤·pull-to-refresh, 변환 상태 폴링, 업로드(태그 추출·검증·스트리밍 멀티파트·ViewModel·다이얼로그), 플레이어(`PlaybackService`·`PlayerRepository`·재생 시작 로직·미니·확장 플레이어·볼륨 저장·알림 권한·오류 처리), 원본 다운로드(`DownloadManager`), 접근성·상태 유지 마감, 임시 앱 아이콘(Task 6-4).
+- **테스트:** 단위 테스트와 Compose UI 테스트 20건이 있다(`connectedDebugAndroidTest`는 에뮬레이터 API 37·espresso 3.7.0에서 통과). `lintDebug` 경고는 0건이다(`PlaybackService`의 `ExportedService`만 의도적으로 무시, PRD §16 #55).
+- **아직 확인되지 않은 것(사용자·실기기 필요):** 실제 Google 로그인 전체 흐름, 한글 IME 검색, 변환 중·실패 뱃지와 폴링 실동작, 소리·잠금 화면·블루투스·전화, 로그인 상태 다운로드, TalkBack.
+- 앱 아이콘은 **임시**(다크 배경 + 음표)이며 최종 디자인은 미정이다.
 
 ## 문서 체계 (`.claude/docs/`)
 

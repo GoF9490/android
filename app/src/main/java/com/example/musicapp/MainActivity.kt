@@ -228,6 +228,8 @@ class MainActivity : ComponentActivity() {
      * 결과(거부 포함)와 무관하게 재생은 진행하므로 콜백에서 할 일이 없다.
      */
     private suspend fun requestNotificationPermissionOnce() {
+        // POST_NOTIFICATIONS는 API 33에서 생겼으므로 그 미만에서는 상수에 접근하지 않는다
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
         // 이미 허용·API 33 미만이면 저장소를 읽지 않는다
