@@ -9,11 +9,13 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.musicapp.data.api.model.StreamPlayResponse
+import com.example.musicapp.data.player.VolumeStore
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,6 +38,7 @@ private const val POSITION_INTERVAL_MS = 500L
 class MediaControllerPlayerRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     @Named("baseUrl") private val baseUrl: String,
+    private val volumeStore: VolumeStore,
 ) : PlayerRepository {
 
     private val _state = MutableStateFlow(PlayerState())
@@ -53,6 +56,20 @@ class MediaControllerPlayerRepository @Inject constructor(
     private class PendingAction(val isPlay: Boolean, val action: (MediaController) -> Unit)
 
     private val pending = ArrayDeque<PendingAction>()
+
+    /** 사용자가 저장값 로드보다 먼저 볼륨을 바꿨으면 로드한 값으로 덮어쓰지 않는다. */
+    private var volumeTouched = false
+
+    init {
+        // 저장된 볼륨을 복원한다. 컨트롤러가 이미 연결되어 있으면 바로 적용한다.
+        scope.launch {
+            val saved = volumeStore.load()
+            if (!volumeTouched) {
+                _state.update { it.copy(volume = saved) }
+                controller?.volume = saved
+            }
+        }
+    }
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) = syncStatus()
@@ -81,7 +98,7 @@ class MediaControllerPlayerRepository @Inject constructor(
             this@MediaControllerPlayerRepository.controller = null
             controllerFuture = null
             stopPositionUpdates()
-            _state.value = PlayerState(repeatOne = _state.value.repeatOne)
+            _state.value = PlayerState(repeatOne = _state.value.repeatOne, volume = _state.value.volume)
             _positionMs.value = 0L
         }
     }
@@ -97,6 +114,7 @@ class MediaControllerPlayerRepository @Inject constructor(
         }
         _positionMs.value = 0L
         runWhenConnected(isPlay = true) { c ->
+            c.volume = _state.value.volume
             c.setMediaItem(createMediaItem(baseUrl, track))
             c.repeatMode = if (_state.value.repeatOne) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
             c.prepare()
@@ -124,7 +142,23 @@ class MediaControllerPlayerRepository @Inject constructor(
     }
 
     override fun setVolume(volume: Float) {
-        runWhenConnected { it.volume = volume.coerceIn(0f, 1f) }
+        val target = volume.coerceIn(0f, 1f)
+        volumeTouched = true
+        _state.update { it.copy(volume = target) }
+        runWhenConnected { it.volume = target }
+    }
+
+    override fun commitVolume() {
+        val target = _state.value.volume
+        scope.launch {
+            try {
+                volumeStore.save(target)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // 저장 실패는 다음 조정 때 다시 시도한다. 재생에는 영향이 없다.
+            }
+        }
     }
 
     override fun setRepeatOne(repeatOne: Boolean) {
@@ -136,7 +170,7 @@ class MediaControllerPlayerRepository @Inject constructor(
 
     override fun stop() {
         stopPositionUpdates()
-        _state.update { PlayerState(repeatOne = it.repeatOne) }
+        _state.update { PlayerState(repeatOne = it.repeatOne, volume = it.volume) }
         _positionMs.value = 0L
         pending.removeAll { it.isPlay }
         runWhenConnected {
@@ -176,6 +210,7 @@ class MediaControllerPlayerRepository @Inject constructor(
                 } else {
                     controller = connected
                     connected.addListener(listener)
+                    connected.volume = _state.value.volume
                     _state.update { it.copy(repeatOne = connected.repeatMode == Player.REPEAT_MODE_ONE || it.repeatOne) }
                     while (pending.isNotEmpty()) pending.removeFirst().action(connected)
                 }

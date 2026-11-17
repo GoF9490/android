@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.LaunchedEffect
+import com.example.musicapp.feature.player.ExpandedPlayerHost
 import com.example.musicapp.feature.player.MiniPlayerHost
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -86,6 +87,11 @@ class MainActivity : ComponentActivity() {
                 // 현재 곡 id만 구독해 재생/일시정지·위치 변화로는 목록이 다시 그려지지 않게 한다
                 val currentTrackId by playerViewModel.currentTrackId.collectAsStateWithLifecycle()
                 var showUpload by rememberSaveable { mutableStateOf(false) }
+                // 확장 플레이어 열림 상태. 회전·재생성에도 유지하고, 곡이 없어지면 닫는다
+                var showExpanded by rememberSaveable { mutableStateOf(false) }
+                LaunchedEffect(currentTrackId) {
+                    if (currentTrackId == null) showExpanded = false
+                }
                 // 로그인 상태에서만 업로드 다이얼로그를 보인다. 로그아웃되면 상태를 초기화하고 닫는다
                 val canUpload = authState is AuthState.LoggedIn
                 LaunchedEffect(canUpload) {
@@ -132,13 +138,21 @@ class MainActivity : ComponentActivity() {
                             MiniPlayerHost(
                                 viewModel = playerViewModel,
                                 baseUrl = BuildConfig.BASE_URL,
-                                onOpenClick = {}, // 확장 플레이어는 Task 5-5
+                                onOpenClick = { showExpanded = true },
                             )
                         }
                     } else {
                         null
                     },
                 ) { padding ->
+                    if (showExpanded && currentTrackId != null) {
+                        ExpandedPlayerHost(
+                            viewModel = playerViewModel,
+                            baseUrl = BuildConfig.BASE_URL,
+                            onDownloadClick = {}, // 다운로드는 Task 6-1
+                            onCloseClick = { showExpanded = false },
+                        )
+                    }
                     if (showUpload && canUpload) {
                         UploadDialogHost(
                             viewModel = uploadViewModel,

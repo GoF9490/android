@@ -55,6 +55,7 @@ private class FakePlayerRepository : PlayerRepository {
 
     override fun seekTo(positionMs: Long) = Unit
     override fun setVolume(volume: Float) = Unit
+    override fun commitVolume() = Unit
     override fun setRepeatOne(repeatOne: Boolean) = Unit
     override fun stop() = Unit
 }

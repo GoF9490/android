@@ -123,7 +123,7 @@ fun MiniPlayerHost(
         baseUrl = baseUrl,
         positionMs = { position.value },
         // 플레이어 duration이 확정되기 전에는 서버가 준 길이를 쓴다
-        durationMs = if (state.durationMs > 0) state.durationMs else track.durationSeconds * 1000L,
+        durationMs = resolveDurationMs(state.durationMs, track.durationSeconds),
         onToggleClick = viewModel::onTogglePlayPause,
         onOpenClick = onOpenClick,
         modifier = modifier,

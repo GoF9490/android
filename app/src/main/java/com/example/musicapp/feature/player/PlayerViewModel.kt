@@ -107,6 +107,17 @@ class PlayerViewModel @Inject constructor(
     /** 미니 플레이어 재생/일시정지 버튼. `/play`는 호출하지 않는다. */
     fun onTogglePlayPause() = playerRepository.togglePlayPause()
 
+    /** 시크 슬라이더에서 손을 뗐을 때 1회. `/play`는 호출하지 않는다. */
+    fun onSeek(positionMs: Long) = playerRepository.seekTo(positionMs)
+
+    /** 볼륨 슬라이더 드래그 중에도 즉시 반영한다(저장은 [onVolumeChangeFinished]). */
+    fun onVolumeChange(volume: Float) = playerRepository.setVolume(volume)
+
+    fun onVolumeChangeFinished() = playerRepository.commitVolume()
+
+    /** 반복재생(REPEAT_MODE_ONE) 토글. `/play`는 호출하지 않는다. */
+    fun onToggleRepeat() = playerRepository.setRepeatOne(!playerRepository.state.value.repeatOne)
+
     fun onTrackClick(track: TrackResponse) {
         when (val action = decidePlayAction(track, playerRepository.state.value, pendingTrackId)) {
             PlayAction.Start -> startPlay(track.trackId)
