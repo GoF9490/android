@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 4 대기 (12/28 Tasks 완료)
+**📊 진행 상황**: Phase 4 진행 중 (13/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -159,7 +159,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 4: 업로드
 
-- **Task 4-1: 태그 추출과 사전 검증**
+- **Task 4-1: 태그 추출과 사전 검증** ✅
   - 📋 `feature/upload/AudioTagReader.kt`: `MediaMetadataRetriever.setDataSource(context, uri)`로 제목·가수·앨범·`embeddedPicture`를 IO 디스패처에서 추출. 값은 `trim()` 후 빈 문자열이면 null. 실패하면 빈 결과 반환(예외를 밖으로 던지지 않음), `release()` 보장
   - 📋 `feature/upload/SelectedFile.kt`: `ContentResolver`로 표시 이름·크기(`OpenableColumns`)·MIME 조회
   - 📋 `feature/upload/UploadValidator.kt`: 음원 100MB 초과, 자켓 10MB 초과·JPEG/PNG 아님, 제목 200자·가수 150자·앨범 200자 초과(trim 후, **초과일 때만** 오류). 순수 함수
