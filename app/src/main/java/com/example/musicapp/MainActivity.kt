@@ -29,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicapp.feature.auth.AuthAction
@@ -42,6 +44,8 @@ import com.example.musicapp.ui.getLoginErrorMessage
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.musicapp.download.TrackDownloader
+import com.example.musicapp.download.needsStoragePermission
 import com.example.musicapp.feature.player.PlayerEvent
 import com.example.musicapp.feature.player.PlayerViewModel
 import com.example.musicapp.feature.tracks.SearchBar
@@ -66,11 +70,26 @@ class MainActivity : ComponentActivity() {
     lateinit var messageBus: MessageBus
 
     @Inject
+    lateinit var trackDownloader: TrackDownloader
+
+    @Inject
     lateinit var notificationPermissionStore: NotificationPermissionStore
 
     // 결과는 사용하지 않는다(거부해도 재생은 동작하며 알림 컨트롤만 제한된다)
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    // API 28 이하에서 저장 권한 허용 후 이어서 실행할 다운로드 요청(trackId to 파일명)
+    private var pendingDownload: Pair<String, String?>? = null
+
+    private val storagePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val pending = pendingDownload
+            pendingDownload = null
+            if (pending != null) {
+                if (granted) startDownload(pending.first, pending.second) else postDownloadFailed()
+            }
+        }
 
     private val authViewModel: AuthViewModel by viewModels()
     private val trackListViewModel: TrackListViewModel by viewModels()
@@ -164,7 +183,12 @@ class MainActivity : ComponentActivity() {
                         ExpandedPlayerHost(
                             viewModel = playerViewModel,
                             baseUrl = BuildConfig.BASE_URL,
-                            onDownloadClick = {}, // 다운로드는 Task 6-1
+                            onDownloadClick = { play ->
+                                // 확장 플레이어는 파일명을 모르므로 목록 상태에서 trackId로 찾는다(없으면 기본 이름)
+                                val name = trackListViewModel.state.value.tracks
+                                    .firstOrNull { it.trackId == play.trackId }?.originalFilename
+                                handleDownloadClick(play.trackId, name)
+                            },
                             onCloseClick = { showExpanded = false },
                         )
                     }
@@ -185,7 +209,7 @@ class MainActivity : ComponentActivity() {
                         state = trackListState,
                         baseUrl = BuildConfig.BASE_URL,
                         onTrackClick = playerViewModel::onTrackClick,
-                        onDownloadClick = {}, // 다운로드는 Task 6-1
+                        onDownloadClick = { track -> handleDownloadClick(track.trackId, track.originalFilename) },
                         onLoadMore = trackListViewModel::loadNextPage,
                         onRefresh = trackListViewModel::refresh,
                         contentPadding = listPadding,
@@ -211,6 +235,35 @@ class MainActivity : ComponentActivity() {
         if (!shouldRequestNotificationPermission(Build.VERSION.SDK_INT, granted, notificationPermissionStore.hasAsked())) return
         notificationPermissionStore.markAsked()
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    /** 다운로드 버튼 처리. API 28 이하에서는 저장 권한을 먼저 확인한다(PRD §8). */
+    private fun handleDownloadClick(trackId: String, filename: String?) {
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+            PackageManager.PERMISSION_GRANTED
+        if (needsStoragePermission(Build.VERSION.SDK_INT, granted)) {
+            pendingDownload = trackId to filename
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            return
+        }
+        startDownload(trackId, filename)
+    }
+
+    private fun startDownload(trackId: String, filename: String?) {
+        lifecycleScope.launch {
+            try {
+                trackDownloader.enqueue(trackId, filename)
+                messageBus.post(UiMessage("download-start", "다운로드를 시작합니다", MessageKind.INFO))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                postDownloadFailed()
+            }
+        }
+    }
+
+    private fun postDownloadFailed() {
+        messageBus.post(UiMessage("download-failed", "다운로드를 시작하지 못했습니다", MessageKind.ERROR))
     }
 
     override fun onNewIntent(intent: Intent) {

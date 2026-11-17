@@ -319,7 +319,7 @@ val mediaItem = MediaItem.Builder()
 
 * 시스템 `DownloadManager`로 `GET {BASE_URL}/api/tracks/{id}/download`를 요청해 공용 `Downloads` 폴더에 저장합니다. Android 10(API 29)+는 공용 폴더 쓰기 권한이 필요 없고 `minSdk 26`~28은 `setDestinationInExternalPublicDir`를 사용합니다(`WRITE_EXTERNAL_STORAGE`는 API 28 이하에만 `maxSdkVersion=28`로 선언).
 * 로그인 상태이면 `addRequestHeader("Authorization", "Bearer …")`를 붙여 **`DOWNLOAD` 이력에 사용자가 귀속**됩니다(웹은 브라우저 이동 방식이라 익명으로 남는 점과 다름).
-* 백엔드는 본문 없이 `X-Accel-Redirect`로 Nginx가 파일을 내려주며 `Content-Disposition: attachment; filename*=UTF-8''…`로 한글 파일명을 지정합니다. `DownloadManager`가 헤더 파일명을 적용하는지 확인하고, 적용되지 않으면 `setTitle`/`setDestinationInExternalPublicDir`의 파일명을 `originalFilename`으로 지정합니다.
+* 백엔드는 본문 없이 `X-Accel-Redirect`로 Nginx가 파일을 내려주며 `Content-Disposition: attachment; filename*=UTF-8''…`로 한글 파일명을 지정합니다. 공용 폴더 저장을 위해 목적지 파일명을 지정하므로 헤더 파일명은 쓰이지 않고, `setTitle`/`setDestinationInExternalPublicDir`의 파일명을 `originalFilename`으로 지정합니다(실측, §16 #49).
 * 모든 상태(`PENDING`·`FAILED` 포함)에서 가능하며, 행 다운로드 버튼은 행 클릭(재생)과 이벤트가 겹치지 않아야 합니다. 완료·실패는 `DownloadManager` 알림에 맡기고, 요청 시점에 "다운로드를 시작합니다" 스낵바를 표시합니다.
 * 한계(MVP 수용): 다운로드 진행·완료 상태를 앱 UI에 반영하지 않습니다.
 
@@ -510,6 +510,9 @@ android/
 | 46 | 확장 플레이어·볼륨 세부 미정 | **확장 플레이어는 `ModalBottomSheet` 대신 풀스크린 `Dialog`(`usePlatformDefaultWidth=false`, 뒤로 가기·닫기 버튼으로 닫음)이며 열림 상태는 `rememberSaveable`. 볼륨은 `PlayerState.volume`에 두고 슬라이더 드래그 중 `player.volume`에 즉시 반영, 손을 뗄 때 1회 별도 DataStore 파일 `player`(`VolumeStore`, Hilt `@Named("player")`)에 저장. 저장값이 없거나 NaN·0..1 밖이면 1.0, 컨트롤러 연결 시와 `play` 시작 시 적용. 시크는 드래그 중 로컬 값만 쓰고 놓을 때 1회 `seekTo`, 길이는 플레이어 duration(0 초과) 우선 아니면 `durationSeconds`. 반복 토글은 `/play`를 거치지 않음** | 시트의 드래그 제스처·inset 충돌 없이 풀스크린을 보장, 드래그 중 매 틱 디스크 쓰기 방지 (Task 5-5) |
 | 47 | 알림 권한 요청 정책·재생 오류 스낵바 세부 미정 | **알림 권한은 재생 시작(`PlayAction.Start`) 클릭마다 `PlayerViewModel`이 `RequestNotificationPermission` 이벤트를 내고, `MainActivity`가 API 33 이상·미허용·"이미 물음 플래그 없음"일 때만 요청한다(`shouldRequestNotificationPermission`). "이미 물음"은 `player` DataStore의 `notificationPermissionAsked`에 **다이얼로그를 띄우는 시점**에 저장하며(허용 여부와 무관, 읽기 실패 시 이미 물은 것으로 간주) 한 번 물으면 다시 묻지 않는다. 시스템 다이얼로그만 쓰고 결과 콜백에서는 아무것도 하지 않는다. 재생 오류 스낵바(id=`PLAYBACK_ERROR`)는 `PlayerViewModel`이 `PlayerState.status`가 Error로 **전이될 때만 1회** 띄우며(`shouldNotifyPlaybackError`, ViewModel 생성 시점에 이미 Error면 띄우지 않음), 컨트롤러 연결 실패도 같은 문구로 취급한다** | 시스템 상태(rationale)로는 "묻기 전"과 "영구 거부"를 구분할 수 없음, Error 유지 중 상태 변화로 스낵바가 반복되지 않게 함 (Task 5-6) |
 | 48 | 최근 앱 제거 시 서비스 종료 조건 미정 | **`PlaybackService.onTaskRemoved`는 `isPlaybackOngoing`(일시정지 뒤 10분간 true) 대신 `playWhenReady`이고 상태가 IDLE·ENDED가 아닐 때만 재생 중으로 보고 유지한다. 그렇지 않으면 `pauseAllPlayersAndStopSelf()` 후 `stop()`·`clearMediaItems()`로 알림·포그라운드를 내린다. `MediaControllerPlayerRepository`는 재생 목록이 비면(`mediaItemCount == 0`, `Loading` 제외) 상태를 초기화해 미니 플레이어가 남지 않게 한다** | 앱 프로세스의 `MediaController` 바인딩 때문에 `stopSelf`만으로는 서비스가 남음(에뮬레이터 실측) (Task 5-6) |
+| 49 | `DownloadManager` 저장 파일명 결정 방식 미정 | **저장 파일명은 항상 `originalFilename`을 `setDestinationInExternalPublicDir`로 지정한다(경로 구분자·제어문자는 `_`로 치환, 비면 `track-{trackId}`). 목적지를 지정하지 않으면 파일이 공용 Downloads가 아닌 내부 캐시에 저장되어 `Content-Disposition` 적용 여부를 공용 폴더에서 볼 수 없고, 목적지를 지정하면 헤더 이름은 쓰이지 않는다. 확장 플레이어는 `StreamPlayResponse`에 파일명이 없어 `MainActivity`가 목록 상태에서 `trackId`로 `originalFilename`을 찾고, 목록에 없으면 `track-{trackId}`** | 한글 파일명을 에뮬레이터에서 정확한 이름·크기로 저장 확인 (Task 6-1) |
+| 50 | API 28 이하 저장 권한 거부 문구 미정 | **`다운로드를 시작하지 못했습니다`(오류 스낵바, 다운로드 미시작). 웹 PRD에 대응 문구 없음. `enqueue` 예외도 같은 문구** | 사용자 승인 (Task 6-1) |
+| 51 | 같은 곡 연타 시 중복 다운로드 정책 미정 | **막지 않는다(탭마다 `DownloadManager` 요청 1건, 파일명은 시스템이 `-1` 등으로 중복 회피). MVP 수용** | 사용자 승인 (Task 6-1) |
 | 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
@@ -536,6 +539,18 @@ android/
 확인하지 못함(실기기·Task 7-2)
 * 소리 출력, 잠금 화면 컨트롤, 블루투스 버튼, 전화 수신·오디오 포커스 충돌, Android 14+ `FOREGROUND_SERVICE_MEDIA_PLAYBACK`의 실기기 동작
 * 알림을 거부했을 때 알림 컨트롤이 사용자에게 실제로 어떻게 보이는지(에뮬레이터에서는 거부 상태에서도 서비스 알림 레코드가 존재함)
+
+**Task 6-1 확인 결과 (2026-11-17, 에뮬레이터 API 37, 비로그인, debug)**
+
+확인됨(에뮬레이터)
+* 평문 HTTP(`http://localhost` + `adb reverse`)로 `DownloadManager`가 정상 다운로드(debug network security config 영향 없음). 요청 시 `다운로드를 시작합니다` 스낵바와 완료 알림 표시.
+* `adb shell ls -l /sdcard/Download`: `sample.wav` 23852B, `test-data.mp3` 1518478B, `바다가 보이는 마을.mp3` 3956434B(한글 파일명). 이름·크기가 서버 `originalFilename`·`fileSizeBytes`와 일치.
+* 행 다운로드 버튼 탭이 재생을 시작시키지 않음(`일시정지` 버튼이 나타나지 않음).
+* 목적지 미지정 요청은 요청은 성공하지만 파일이 공용 Downloads에 없음(내부 캐시 저장 추정) → `Content-Disposition` 직접 적용 여부는 공용 폴더에서 확인 불가, 결정 이력 #49 방식 채택.
+
+확인하지 못함
+* 로그인 상태 다운로드(`Authorization` 헤더 전송·`DOWNLOAD` 이력 귀속). `PENDING`·`FAILED` 곡(서버에 해당 상태 곡이 없었음, 코드상 상태 분기 없음).
+* 확장 플레이어의 다운로드 버튼(UI 탐색 미수행), API 28 이하 `WRITE_EXTERNAL_STORAGE` 런타임 요청 경로(에뮬레이터가 API 37뿐).
 
 **MVP 이후 과제**
 
