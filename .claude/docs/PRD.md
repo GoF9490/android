@@ -515,6 +515,7 @@ android/
 | 51 | 같은 곡 연타 시 중복 다운로드 정책 미정 | **막지 않는다(탭마다 `DownloadManager` 요청 1건, 파일명은 시스템이 `-1` 등으로 중복 회피). MVP 수용** | 사용자 승인 (Task 6-1) |
 | 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 | 52 | 프로세스 재생성 복원 범위 미정 | **검색어만 `SavedStateHandle`로 복원하고 목록은 저장하지 않고 재조회한다. 확장 플레이어·업로드 다이얼로그 열림은 `rememberSaveable`. 재생은 회전에서만 유지를 검증한다(서비스가 앱과 같은 프로세스). 곡 행 클릭에 `onClickLabel = "재생"`을 둔다** | Bundle 크기 제한, 접근성(Task 6-2) |
+| 53 | UI 테스트 의존성 추가 승인 | **`androidTestImplementation`에 `espresso-core` 3.7.0(안정판)을 버전 카탈로그로 추가. compose ui-test가 끌어오는 3.5.0이 API 37에서 `InputManager.getInstance` 반사 호출 실패(`NoSuchMethodException`)로 모든 UI 테스트가 깨졌기 때문. 그 외 테스트 의존성은 추가하지 않음** | 사용자 결재 2026-11-17 (Task 6-3) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
