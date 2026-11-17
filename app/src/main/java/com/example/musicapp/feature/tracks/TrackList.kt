@@ -29,6 +29,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -80,7 +83,14 @@ fun TrackList(
     }
     // 새 검색 결과가 오면 맨 위부터 보여 준다
     val firstTrackId = state.tracks.firstOrNull()?.trackId
-    LaunchedEffect(firstTrackId) { listState.scrollToItem(0) }
+    // 회전·재생성 때는 첫 곡이 같으므로 복원된 스크롤 위치를 유지한다
+    var lastFirstTrackId by rememberSaveable { mutableStateOf(firstTrackId) }
+    LaunchedEffect(firstTrackId) {
+        if (firstTrackId != lastFirstTrackId) {
+            lastFirstTrackId = firstTrackId
+            listState.scrollToItem(0)
+        }
+    }
 
     val error = state.error
 
