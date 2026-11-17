@@ -30,6 +30,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicapp.feature.tracks.SearchBar
+import com.example.musicapp.feature.upload.UploadDialogHost
+import com.example.musicapp.feature.upload.UploadViewModel
+import com.example.musicapp.data.auth.AuthState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.example.musicapp.feature.tracks.TrackList
 import com.example.musicapp.feature.tracks.TrackListViewModel
 import com.example.musicapp.ui.MainScreen
@@ -46,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
     private val trackListViewModel: TrackListViewModel by viewModels()
+    private val uploadViewModel: UploadViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +75,15 @@ class MainActivity : ComponentActivity() {
                 val trackListState by trackListViewModel.state.collectAsStateWithLifecycle()
                 val expiredIds by trackListViewModel.poller.expiredIds.collectAsStateWithLifecycle()
                 val statusScope = rememberCoroutineScope()
+                var showUpload by rememberSaveable { mutableStateOf(false) }
+                // 로그인 상태에서만 업로드 다이얼로그를 보인다. 로그아웃되면 상태를 초기화하고 닫는다
+                val canUpload = authState is AuthState.LoggedIn
+                LaunchedEffect(canUpload) {
+                    if (!canUpload && authState !is AuthState.Loading) {
+                        showUpload = false
+                        uploadViewModel.reset()
+                    }
+                }
                 // 변환 상태 폴링: 앱이 STARTED일 때만 돌고 백그라운드에서는 취소된다(PRD §6.3)
                 val lifecycleOwner = LocalLifecycleOwner.current
                 LaunchedEffect(lifecycleOwner) {
@@ -87,11 +103,18 @@ class MainActivity : ComponentActivity() {
                         AuthAction(
                             authState = authState,
                             onLoginClick = ::handleLoginClick,
-                            onUploadClick = {}, // Task 016에서 업로드 다이얼로그 연결
+                            onUploadClick = { showUpload = true },
                             onLogoutClick = authViewModel::handleLogout,
                         )
                     },
                 ) { padding ->
+                    if (showUpload && canUpload) {
+                        UploadDialogHost(
+                            viewModel = uploadViewModel,
+                            onDismiss = { showUpload = false },
+                            onCompleted = trackListViewModel::refresh,
+                        )
+                    }
                     TrackList(
                         state = trackListState,
                         baseUrl = BuildConfig.BASE_URL,
