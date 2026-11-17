@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 6 진행 중 (23/28 Tasks 완료)
+**📊 진행 상황**: Phase 6 진행 중 (24/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -275,7 +275,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §8 / API.md §3.7
   - 주의: [탐색] `DownloadManager`는 평문 HTTP에서 debug용 network security config의 영향을 받는다. 실패하면 원인을 로그로 확인한다. [구현] 토큰을 다운로드 제목·설명에 넣지 않는다. 파일을 앱 메모리로 읽지 않는다. [검토] 행의 다운로드 버튼이 재생을 시작시키지 않는지 확인.
 
-- **Task 6-2: 접근성·화면 상태 마감**
+- **Task 6-2: 접근성·화면 상태 마감** ✅
   - 📋 모든 아이콘 버튼의 `contentDescription` 점검(`재생`, `일시정지`, `{title} 원본 다운로드`, `현재 곡 원본 다운로드`, `반복재생` 등), 터치 영역 48dp 이상, 토글의 선택 상태(`semantics`)
   - 📋 화면 회전·프로세스 재생성: 검색어·목록·스크롤 위치·확장 플레이어 열림 상태 유지(`rememberSaveable`/`SavedStateHandle`), 재생은 서비스가 유지
   - 📋 작은 화면(폭 360dp)과 큰 글꼴 설정에서 레이아웃이 깨지지 않는지 확인하고 수정
