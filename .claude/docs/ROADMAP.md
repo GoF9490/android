@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 6 진행 중 (24/28 Tasks 완료)
+**📊 진행 상황**: Phase 6 진행 중 (25/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -285,7 +285,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §9.3, §14
   - 주의: [검토] 색만으로 상태를 전달하는 곳이 없는지(뱃지·현재 재생 행·토글) 다시 본다.
 
-- **Task 6-3: Compose UI 테스트**
+- **Task 6-3: Compose UI 테스트** ✅
   - 📋 `app/src/androidTest/`: 가짜 Repository를 주입해 서버 없이 동작하는 UI 테스트 구성(Hilt 테스트 설정 또는 ViewModel 직접 주입 방식 중 프로젝트에 맞는 쪽)
   - 📋 테스트: 로그인 다이얼로그 표시, 프로필 메뉴 두 항목, 상태 뱃지 3종, 업로드 다이얼로그(태그 채움·placeholder·인라인 오류), 미니 플레이어 재생/일시정지 토글
   - 완료 기준: 에뮬레이터에서 `connectedDebugAndroidTest`가 통과한다.
