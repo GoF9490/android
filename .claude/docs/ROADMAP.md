@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 5 진행 중 (20/28 Tasks 완료)
+**📊 진행 상황**: Phase 5 진행 중 (21/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -243,7 +243,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §7.4, §9.1, §9.2, §9.3
   - 주의: [구현] 진행바 갱신(500ms)이 화면 전체를 다시 그리지 않도록 위치 상태 구독을 진행바 Composable 안으로 한정한다. 재생 상태의 단일 출처는 `PlayerRepository`다.
 
-- **Task 5-5: 확장 플레이어 컨트롤**
+- **Task 5-5: 확장 플레이어 컨트롤** ✅
   - 📋 `feature/player/ExpandedPlayer.kt`: 풀스크린 시트 — 큰 앨범자켓, 제목·가수, 재생/일시정지, 시크 슬라이더, `01:15 / 03:40` 시간 표기(`formatClock`), 볼륨 슬라이더, 반복 토글, 다운로드 버튼(콜백만, 동작은 Task 6-1), 닫기
   - 📋 시크: 드래그 중에는 로컬 값만 갱신, 손을 뗄 때 1회 `seekTo`. 길이는 `durationSeconds`로 초기화하고 플레이어 duration으로 보정
   - 📋 볼륨: `setVolume` 즉시 반영, 값은 DataStore에 저장하고 앱 시작·컨트롤러 연결 시 복원(손상 값은 1.0)
