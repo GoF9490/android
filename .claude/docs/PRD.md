@@ -504,6 +504,7 @@ android/
 | 39 | 업로드 전송 세부 미정 | **업로드는 `@Named("upload")` 클라이언트(`base` 파생, read/write/call 타임아웃 0, `AuthInterceptor` 부착, `RetryInterceptor`·로깅 없음)와 전용 `MusicApi`를 쓴다. `ContentUriRequestBody`는 8KB 청크 스트리밍·`isOneShot`이며 진행률은 file 파트 기준(자켓 제외)으로 정수 퍼센트가 바뀌고 100ms 이상 지났을 때만 보고(0%·100%는 항상). 파트 순서는 title·artist·album·artworkFile·file(큰 file을 마지막에 두어 100%가 요청 끝에 가깝게; 서버는 `@RequestPart` 이름으로 읽어 순서 무관). 한글 파일명은 OkHttp 기본(UTF-8 원문)** | 대용량·저속망 대응, 진행률 과호출 방지 (Task 4-2) |
 | 40 | 업로드 상태·경합 세부 미정 | **`UploadViewModel`이 상태(`UploadState`)와 완료 이벤트(`Channel` 기반 `events`, `Completed`)를 노출하고, 목록 새로고침은 UI(4-4)가 이벤트를 받아 연결. 파일 메타 조회는 `SelectedFileResolver` 인터페이스로 분리해 ViewModel이 `Context`를 갖지 않음. 파일 재선택 시 직접 수정하지 않은 칸만 초기화(수정한 칸은 비워도 유지), 내장 커버는 초기화·사용자 자켓은 유지. 태그 추출 5초 타임아웃·실패는 값 없음. 전송 중 입력·재선택·중복 업로드는 무시, 취소는 전송만 중단하고 `Editing` 복귀** | 늦은 태그·진행률 콜백이 상태를 덮어쓰지 않게 세대 번호로 가드 (Task 4-3) |
 | 41 | 업로드 다이얼로그 UI 세부 미정 | **전송 중 문구 `업로드 중... {n}%`(웹과 동일), 100% 이후 `서버에서 처리 중...`. 글자 수 초과는 입력을 막지 않고 저장 시 인라인 오류. 라벨은 입력칸 위에 따로 두어 placeholder가 항상 보이게 함. 다이얼로그는 `Dialog`, 전송 중 닫기 요청만 확인 대화상자(`계속 업로드`/`전송 취소하고 닫기`). `UploadViewModel`은 Activity 범위로 두고 닫을 때 `reset()`** | 회전에 전송이 끊기지 않게 하고, `accent` 빨강은 텍스트 색으로 쓰지 않으므로 버튼 글자는 본문 색 사용 |
+| 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
