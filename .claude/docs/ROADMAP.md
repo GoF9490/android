@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 5 진행 중 (17/28 Tasks 완료)
+**📊 진행 상황**: Phase 5 진행 중 (18/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -212,7 +212,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §7.1, §7.3
   - 주의: [계획] ExoPlayer는 이 서비스만 만든다. Activity·ViewModel에서 직접 만들지 않는다. [구현] Media3 API는 버전별 변경이 잦으니 Context7로 Media3 1.11 문서를 확인하고 작성한다. HLS는 `media3-exoplayer-hls` 의존성이 있으면 기본 `MediaSource` 팩토리가 처리한다.
 
-- **Task 5-2: PlayerRepository (MediaController 연결)**
+- **Task 5-2: PlayerRepository (MediaController 연결)** ✅
   - 📋 `player/PlayerRepository.kt`: 인터페이스 — `state: StateFlow<PlayerState>`(`currentTrack: StreamPlayResponse?`, `isPlaying`, `durationMs`, `repeatOne`, `status: Idle/Loading/Playing/Paused/Ended/Error`), `positionMs: StateFlow<Long>`, `play(track)`, `togglePlayPause()`, `seekTo(ms)`, `setVolume(0f..1f)`, `setRepeatOne(Boolean)`, `stop()`
   - 📋 `player/MediaControllerPlayerRepository.kt`: `SessionToken`으로 `MediaController`를 비동기 연결, `Player.Listener`를 상태로 변환, 재생 중에만 500ms 간격으로 위치 갱신. `play(track)`은 PRD §7.2대로 `MediaItem`(mediaId, `resolveMediaUrl`한 URI, `MimeTypes.APPLICATION_M3U8`, 제목·가수·아트워크 메타데이터)을 만들어 `setMediaItem` → `prepare` → `play`
   - 📋 `di/PlayerModule.kt`: 인터페이스 바인딩(싱글턴)
