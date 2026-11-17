@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 4 진행 중 (13/28 Tasks 완료)
+**📊 진행 상황**: Phase 4 진행 중 (14/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -169,7 +169,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §5.1, §5.2
   - 주의: [구현] 크기는 1024 단위. 음원 형식·크기·자켓 오류 문구는 PRD §3.4 문구를 재사용하고, 글자 수 초과 문구는 "…자 이하로 입력해 주세요." 형식이다. `AudioTagReader`는 Android 프레임워크 의존이라 단위 테스트 대상이 아니다.
 
-- **Task 4-2: 스트리밍 멀티파트 업로드**
+- **Task 4-2: 스트리밍 멀티파트 업로드** ✅
   - 📋 `data/tracks/ContentUriRequestBody.kt`: `ContentResolver.openInputStream` 기반 `RequestBody`. `contentLength`는 조회한 크기, 쓰기 중 누적 바이트를 콜백으로 보고(진행률)
   - 📋 `TrackRepository.uploadTrack(file, title?, artist?, album?, artwork?, onProgress)`: `file` 파트는 필수, 나머지는 `trim()` 후 값이 있을 때만 파트 추가. 파일 파트의 filename은 원본 표시 이름
   - 📋 업로드 전용 `OkHttpClient`(`@Named`): `writeTimeout`·`readTimeout`·`callTimeout` 해제, 재시도 없음. 코루틴 취소 시 `Call`이 취소되어야 한다
