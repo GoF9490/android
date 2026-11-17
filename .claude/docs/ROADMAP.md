@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 5 진행 중 (18/28 Tasks 완료)
+**📊 진행 상황**: Phase 5 진행 중 (19/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -222,7 +222,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §7.1, §7.2, §13
   - 주의: [계획] ViewModel 테스트에서 가짜 구현을 쓸 수 있게 인터페이스에 Media3 타입을 노출하지 않는다. [구현] 컨트롤러 연결 전의 호출은 연결 후 실행되게 대기 처리한다. 미디어 요청에는 인증 헤더가 필요 없다.
 
-- **Task 5-3: 재생 시작 로직**
+- **Task 5-3: 재생 시작 로직** ✅
   - 📋 `feature/player/PlayerViewModel.kt`: `onTrackClick(track)` 분기 — `PENDING`/`PROCESSING`이면 `TRACK_NOT_READY` 문구 스낵바, `FAILED`면 `변환에 실패한 곡입니다` 스낵바, `READY`면 재생 시작
   - 📋 재생 시작: `GET /api/tracks/{id}/play` 1회 → `PlayerRepository.play`. 요청마다 증가하는 `requestId`로 최신이 아닌 응답 폐기
   - 📋 같은 곡 재클릭: `Playing`/`Paused`면 `/play` 없이 토글, `Ended`/`Error`면 `/play` 재호출, `Loading` 중이면 무시
