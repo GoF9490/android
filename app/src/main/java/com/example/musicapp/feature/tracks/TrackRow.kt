@@ -51,7 +51,7 @@ fun TrackRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClickLabel = "재생", onClick = onClick)
             .semantics {
                 selected = isCurrent
                 if (isCurrent) stateDescription = "현재 재생 중"

@@ -1,5 +1,6 @@
 package com.example.musicapp.feature.tracks
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicapp.data.api.ApiException
@@ -45,15 +46,19 @@ data class TrackListState(
 class TrackListViewModel @Inject constructor(
     private val repository: TrackRepository,
     private val messageBus: MessageBus,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val mutableState = MutableStateFlow(TrackListState())
+    /** 프로세스 재생성 후에도 검색어를 복원한다(목록은 복원하지 않고 재조회). */
+    private val restoredKeyword: String = (savedStateHandle.get<String>(KEY_KEYWORD) ?: "").take(MAX_KEYWORD_LENGTH)
+
+    private val mutableState = MutableStateFlow(TrackListState(keyword = restoredKeyword))
     val state: StateFlow<TrackListState> = mutableState.asStateFlow()
 
-    private val keywordInput = MutableStateFlow("")
+    private val keywordInput = MutableStateFlow(restoredKeyword)
 
     /** 마지막으로 조회에 쓴 검색어(trim 후, 빈 값이면 null). */
-    private var activeKeyword: String? = null
+    private var activeKeyword: String? = restoredKeyword.trim().ifEmpty { null }
     private var currentPage = 0
     private var generation = 0
     private var firstPageJob: Job? = null
@@ -94,6 +99,7 @@ class TrackListViewModel @Inject constructor(
         val limited = input.take(MAX_KEYWORD_LENGTH)
         mutableState.update { it.copy(keyword = limited) }
         keywordInput.value = limited
+        savedStateHandle[KEY_KEYWORD] = limited
     }
 
     fun refresh() {
@@ -186,5 +192,6 @@ class TrackListViewModel @Inject constructor(
     companion object {
         const val SEARCH_DEBOUNCE_MILLIS = 300L
         const val MAX_KEYWORD_LENGTH = 200
+        private const val KEY_KEYWORD = "keyword"
     }
 }

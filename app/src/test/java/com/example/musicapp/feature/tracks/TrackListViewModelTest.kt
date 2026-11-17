@@ -1,5 +1,6 @@
 package com.example.musicapp.feature.tracks
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.musicapp.data.api.ApiException
 import com.example.musicapp.data.api.ErrorCode
@@ -62,7 +63,32 @@ class TrackListViewModelTest {
     private fun page(vararg ids: String, hasNext: Boolean = false) =
         TrackPageResponse(ids.map { track(it) }, 0, 20, ids.size.toLong(), 1, hasNext)
 
-    private fun createViewModel() = TrackListViewModel(repository, messageBus)
+    private fun createViewModel(handle: SavedStateHandle = SavedStateHandle()) =
+        TrackListViewModel(repository, messageBus, handle)
+
+    @Test
+    fun 저장된_검색어가_있으면_복원하고_그_검색어로_조회한다() = runTest(dispatcher) {
+        coEvery { repository.getTracks("가수", 0) } returns page("a")
+
+        val viewModel = createViewModel(SavedStateHandle(mapOf("keyword" to "가수")))
+        assertEquals("가수", viewModel.state.value.keyword)
+        advanceUntilIdle()
+
+        assertEquals(listOf("a"), viewModel.state.value.tracks.map { it.trackId })
+        coVerify(exactly = 1) { repository.getTracks("가수", 0) }
+    }
+
+    @Test
+    fun 검색어_입력은_SavedStateHandle에_저장된다() = runTest(dispatcher) {
+        coEvery { repository.getTracks(any(), any()) } returns page("a")
+        val handle = SavedStateHandle()
+
+        val viewModel = createViewModel(handle)
+        viewModel.updateKeyword("abc")
+
+        assertEquals("abc", handle.get<String>("keyword"))
+        advanceUntilIdle()
+    }
 
     @Test
     fun 초기_로딩이_성공하면_목록과_hasNext가_반영된다() = runTest(dispatcher) {
