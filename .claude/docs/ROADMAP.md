@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 5 대기 (16/28 Tasks 완료)
+**📊 진행 상황**: Phase 5 진행 중 (17/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -203,7 +203,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 5: 플레이어
 
-- **Task 5-1: PlaybackService (백그라운드 재생 서비스)**
+- **Task 5-1: PlaybackService (백그라운드 재생 서비스)** ✅
   - 📋 `player/PlaybackService.kt`: `MediaSessionService` 구현. ExoPlayer 생성(`setAudioAttributes(…, handleAudioFocus = true)`, `setHandleAudioBecomingNoisy(true)`), `MediaSession` 발행, `onGetSession` 반환, `onTaskRemoved`에서 재생 중이 아니면 종료, `onDestroy`에서 player·session `release()`
   - 📋 `AndroidManifest.xml`: `<service android:name=".player.PlaybackService" android:foregroundServiceType="mediaPlayback" android:exported="true">` + `androidx.media3.session.MediaSessionService` intent-filter(주석 자리 교체)
   - 📋 세션 액티비티: 알림을 탭하면 `MainActivity`가 열리도록 `setSessionActivity` 설정
