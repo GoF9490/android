@@ -16,6 +16,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 const val SEARCH_PLACEHOLDER = "노래 제목 또는 가수를 검색하세요..."
@@ -36,7 +37,7 @@ fun SearchBar(
         modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
         singleLine = true,
         shape = CircleShape,
-        placeholder = { Text(SEARCH_PLACEHOLDER, maxLines = 1, color = muted) },
+        placeholder = { Text(SEARCH_PLACEHOLDER, maxLines = 1, overflow = TextOverflow.Ellipsis, color = muted) },
         leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = muted) },
         trailingIcon = {
             if (keyword.isNotEmpty()) {
