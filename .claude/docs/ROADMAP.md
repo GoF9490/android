@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 3 대기 (9/28 Tasks 완료)
+**📊 진행 상황**: Phase 3 진행 중 (10/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -126,7 +126,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 3: 목록·검색
 
-- **Task 3-1: 트랙 목록 상태 관리**
+- **Task 3-1: 트랙 목록 상태 관리** ✅
   - 📋 `data/tracks/TrackRepository.kt`: `getTracks(keyword, page)`(size 20), `getTrack(trackId)`. 오류는 `ApiException`으로 정규화
   - 📋 `feature/tracks/TrackListViewModel.kt`: 상태(`tracks`, `isLoading`, `isLoadingMore`, `hasNext`, `keyword`, `error`). `loadNextPage()`(중복 호출 방지, `hasNext=false`면 무시), `refresh()`, `updateTrack(track)`(행 단위 갱신용)
   - 📋 검색: 입력은 즉시 상태에 반영, 조회는 300ms 디바운스, `trim()` 후 빈 값이면 `keyword` 미전송, 200자 제한. 검색어가 바뀌면 page 0부터 다시 조회하되 새 결과 도착 전까지 이전 목록 유지, 이전 요청 취소·늦은 응답 폐기
