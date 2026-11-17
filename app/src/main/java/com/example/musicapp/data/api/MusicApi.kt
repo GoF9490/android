@@ -41,14 +41,16 @@ interface MusicApi {
     /**
      * 업로드. 필드명은 `Part.createFormData` 이름으로 정해진다
      * (`file`, `title`, `artist`, `album`, `artworkFile`). null 파트는 전송에서 빠진다.
+     * 멀티파트는 파라미터 순서대로 전송되므로 큰 `file`을 마지막에 둔다
+     * (진행률 100%가 요청 끝과 가깝도록. 서버는 `@RequestPart` 이름으로 읽어 순서와 무관하다).
      */
     @Multipart
     @POST("api/tracks/upload")
     suspend fun uploadTrack(
-        @Part file: MultipartBody.Part,
         @Part title: MultipartBody.Part?,
         @Part artist: MultipartBody.Part?,
         @Part album: MultipartBody.Part?,
         @Part artworkFile: MultipartBody.Part?,
+        @Part file: MultipartBody.Part,
     ): TrackResponse
 }

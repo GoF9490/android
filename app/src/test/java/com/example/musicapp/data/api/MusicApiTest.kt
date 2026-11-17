@@ -111,7 +111,7 @@ class MusicApiTest {
             "file", "a.mp3", "x".toByteArray().toRequestBody("audio/mpeg".toMediaType())
         )
 
-        val result = api.uploadTrack(file, null, null, null, null)
+        val result = api.uploadTrack(null, null, null, null, file)
 
         val request = server.takeRequest()
         val body = request.body.readUtf8()

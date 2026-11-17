@@ -7,6 +7,7 @@ import com.example.musicapp.data.api.RetryInterceptor
 import com.example.musicapp.data.api.apiJson
 import com.example.musicapp.data.auth.AuthInterceptor
 import com.example.musicapp.data.auth.TokenStore
+import com.example.musicapp.data.tracks.UriStreamOpener
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
@@ -20,6 +21,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -48,6 +50,16 @@ fun createBaseOkHttpClient(): OkHttpClient {
         .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .build()
+}
+
+/** 업로드용: 읽기·쓰기·호출 타임아웃을 해제하고(대용량·저속망) 재시도 인터셉터는 붙이지 않는다. 토큰은 부착한다. */
+fun createUploadOkHttpClient(base: OkHttpClient, baseUrl: HttpUrl, tokenProvider: () -> String?): OkHttpClient {
+    return base.newBuilder()
+        .readTimeout(0, TimeUnit.MILLISECONDS)
+        .writeTimeout(0, TimeUnit.MILLISECONDS)
+        .callTimeout(0, TimeUnit.MILLISECONDS)
+        .addInterceptor(AuthInterceptor(baseUrl, tokenProvider))
         .build()
 }
 
@@ -86,6 +98,29 @@ object NetworkModule {
             .addInterceptor(RetryInterceptor())
             .build()
     }
+
+    @Provides
+    @Singleton
+    @Named("upload")
+    fun provideUploadOkHttpClient(
+        @Named("base") base: OkHttpClient,
+        @Named("baseUrl") baseUrl: String,
+        tokenStore: TokenStore,
+    ): OkHttpClient = createUploadOkHttpClient(base, baseUrl.toHttpUrl()) { tokenStore.getCachedToken() }
+
+    @Provides
+    @Singleton
+    @Named("upload")
+    fun provideUploadMusicApi(
+        @Named("baseUrl") baseUrl: String,
+        @Named("upload") client: OkHttpClient,
+        json: Json,
+    ): MusicApi = createRetrofit(baseUrl, client, json).create(MusicApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUriStreamOpener(@ApplicationContext context: Context): UriStreamOpener =
+        UriStreamOpener { uri -> context.contentResolver.openInputStream(uri) }
 
     @Provides
     @Singleton

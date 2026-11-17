@@ -20,7 +20,7 @@ import retrofit2.Response
 class TrackRepositoryTest {
 
     private val api = mockk<MusicApi>()
-    private val repository = TrackRepository(api)
+    private val repository = TrackRepository(api, api, mockk<UriStreamOpener>())
     private val emptyPage = TrackPageResponse(emptyList(), 0, 20, 0, 0, false)
 
     @Test

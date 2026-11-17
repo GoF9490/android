@@ -82,7 +82,7 @@ class NetworkModuleTest {
     fun uploadTrack_5xx는_재시도하지_않는다() = runTest {
         server.enqueue(MockResponse().setResponseCode(500))
         val file = MultipartBody.Part.createFormData("file", "a.mp3")
-        val e = runCatching { api.uploadTrack(file, null, null, null, null) }.exceptionOrNull()!!
+        val e = runCatching { api.uploadTrack(null, null, null, null, file) }.exceptionOrNull()!!
         assertEquals(ErrorCode.INTERNAL_ERROR, normalizeError(e).code)
         assertEquals(1, server.requestCount)
     }
