@@ -1,6 +1,13 @@
 package com.example.musicapp
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.example.musicapp.data.player.NotificationPermissionStore
+import com.example.musicapp.data.player.shouldRequestNotificationPermission
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -58,6 +65,13 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var messageBus: MessageBus
 
+    @Inject
+    lateinit var notificationPermissionStore: NotificationPermissionStore
+
+    // 결과는 사용하지 않는다(거부해도 재생은 동작하며 알림 컨트롤만 제한된다)
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     private val authViewModel: AuthViewModel by viewModels()
     private val trackListViewModel: TrackListViewModel by viewModels()
     private val uploadViewModel: UploadViewModel by viewModels()
@@ -113,6 +127,7 @@ class MainActivity : ComponentActivity() {
                         when (event) {
                             is PlayerEvent.TrackRefreshed -> trackListViewModel.updateTrack(event.track)
                             PlayerEvent.ListRefreshRequested -> trackListViewModel.refresh()
+                            PlayerEvent.RequestNotificationPermission -> requestNotificationPermissionOnce()
                         }
                     }
                 }
@@ -182,6 +197,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * 첫 재생 시점에 알림 권한을 한 번만 요청한다(PRD §7.3). 시스템 다이얼로그만 쓰고,
+     * 결과(거부 포함)와 무관하게 재생은 진행하므로 콜백에서 할 일이 없다.
+     */
+    private suspend fun requestNotificationPermissionOnce() {
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        // 이미 허용·API 33 미만이면 저장소를 읽지 않는다
+        if (!shouldRequestNotificationPermission(Build.VERSION.SDK_INT, granted, alreadyAsked = false)) return
+        if (!shouldRequestNotificationPermission(Build.VERSION.SDK_INT, granted, notificationPermissionStore.hasAsked())) return
+        notificationPermissionStore.markAsked()
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     override fun onNewIntent(intent: Intent) {

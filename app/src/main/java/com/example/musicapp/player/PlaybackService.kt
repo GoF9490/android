@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
@@ -53,8 +54,18 @@ class PlaybackService : MediaSessionService() {
 
     /** 재생 중이면 포그라운드로 유지하고, 아니면 모든 플레이어를 멈추고 서비스를 종료한다. */
     override fun onTaskRemoved(rootIntent: Intent?) {
-        if (!isPlaybackOngoing) {
+        // isPlaybackOngoing는 일시정지 뒤 10분간 true라서(Media3가 포그라운드를 유지) 쓰지 않고 직접 판단한다.
+        val player = mediaSession?.player
+        val isActive = player != null && player.playWhenReady &&
+            player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED
+        if (!isActive) {
             pauseAllPlayersAndStopSelf()
+            // 앱 프로세스의 MediaController가 서비스에 바인딩되어 있으면 stopSelf만으로는 서비스와
+            // 알림이 남는다. 재생 목록을 비워 알림과 포그라운드 상태를 내린다.
+            player?.run {
+                stop()
+                clearMediaItems()
+            }
         }
     }
 

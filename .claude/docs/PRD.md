@@ -508,6 +508,8 @@ android/
 | 44 | `PlayerViewModel`과 목록 협력 방식 미정 | **`PlayerViewModel.events`(Channel 기반)가 409 재조회 결과(`TrackRefreshed`)·404(`ListRefreshRequested`)를 발행하고 `MainActivity`가 `TrackListViewModel.updateTrack`/`refresh`로 중계. 두 ViewModel은 서로를 참조하지 않음. 응답 대기 중 다른 곡 클릭은 이전 요청을 취소·폐기(requestId)하고 같은 곡 클릭은 무시. 행 클릭 분기는 순수 함수 `decidePlayAction`** | 생명주기가 다른 콜백 보관 없이 테스트 가능하게 (Task 5-3) |
 | 45 | 미니 플레이어 바 세부 미정 | **`PlayerViewModel`이 `playerState`·`positionMs`를 노출하고 `MiniPlayerHost`가 구독. 위치 State는 읽지 않고 람다로 넘겨 진행바 그리기 단계에서만 읽음. 진행바는 장식이라 접근성 트리에서 숨김(`clearAndSetSemantics`). 곡이 없으면 `playerBar` 슬롯을 null로 두고, 목록 하단 패딩은 `max(Scaffold 하단, 내비게이션 바)`로 보정. 현재 곡 행은 좌측 accent 바 + `선택됨`/`현재 재생 중` 상태 설명, 로딩 중에는 재생 버튼 자리에 인디케이터** | 500ms 갱신이 목록·바 본문 recomposition을 일으키지 않게 하고 낭독 소음 방지 (Task 5-4) |
 | 46 | 확장 플레이어·볼륨 세부 미정 | **확장 플레이어는 `ModalBottomSheet` 대신 풀스크린 `Dialog`(`usePlatformDefaultWidth=false`, 뒤로 가기·닫기 버튼으로 닫음)이며 열림 상태는 `rememberSaveable`. 볼륨은 `PlayerState.volume`에 두고 슬라이더 드래그 중 `player.volume`에 즉시 반영, 손을 뗄 때 1회 별도 DataStore 파일 `player`(`VolumeStore`, Hilt `@Named("player")`)에 저장. 저장값이 없거나 NaN·0..1 밖이면 1.0, 컨트롤러 연결 시와 `play` 시작 시 적용. 시크는 드래그 중 로컬 값만 쓰고 놓을 때 1회 `seekTo`, 길이는 플레이어 duration(0 초과) 우선 아니면 `durationSeconds`. 반복 토글은 `/play`를 거치지 않음** | 시트의 드래그 제스처·inset 충돌 없이 풀스크린을 보장, 드래그 중 매 틱 디스크 쓰기 방지 (Task 5-5) |
+| 47 | 알림 권한 요청 정책·재생 오류 스낵바 세부 미정 | **알림 권한은 재생 시작(`PlayAction.Start`) 클릭마다 `PlayerViewModel`이 `RequestNotificationPermission` 이벤트를 내고, `MainActivity`가 API 33 이상·미허용·"이미 물음 플래그 없음"일 때만 요청한다(`shouldRequestNotificationPermission`). "이미 물음"은 `player` DataStore의 `notificationPermissionAsked`에 **다이얼로그를 띄우는 시점**에 저장하며(허용 여부와 무관, 읽기 실패 시 이미 물은 것으로 간주) 한 번 물으면 다시 묻지 않는다. 시스템 다이얼로그만 쓰고 결과 콜백에서는 아무것도 하지 않는다. 재생 오류 스낵바(id=`PLAYBACK_ERROR`)는 `PlayerViewModel`이 `PlayerState.status`가 Error로 **전이될 때만 1회** 띄우며(`shouldNotifyPlaybackError`, ViewModel 생성 시점에 이미 Error면 띄우지 않음), 컨트롤러 연결 실패도 같은 문구로 취급한다** | 시스템 상태(rationale)로는 "묻기 전"과 "영구 거부"를 구분할 수 없음, Error 유지 중 상태 변화로 스낵바가 반복되지 않게 함 (Task 5-6) |
+| 48 | 최근 앱 제거 시 서비스 종료 조건 미정 | **`PlaybackService.onTaskRemoved`는 `isPlaybackOngoing`(일시정지 뒤 10분간 true) 대신 `playWhenReady`이고 상태가 IDLE·ENDED가 아닐 때만 재생 중으로 보고 유지한다. 그렇지 않으면 `pauseAllPlayersAndStopSelf()` 후 `stop()`·`clearMediaItems()`로 알림·포그라운드를 내린다. `MediaControllerPlayerRepository`는 재생 목록이 비면(`mediaItemCount == 0`, `Loading` 제외) 상태를 초기화해 미니 플레이어가 남지 않게 한다** | 앱 프로세스의 `MediaController` 바인딩 때문에 `stopSelf`만으로는 서비스가 남음(에뮬레이터 실측) (Task 5-6) |
 | 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
@@ -520,6 +522,20 @@ android/
 * Android 13+ 알림 권한 거부 시 백그라운드 재생·알림 컨트롤 동작, Android 14+ `FOREGROUND_SERVICE_MEDIA_PLAYBACK` 동작
 * HLS 시크·반복재생(`REPEAT_MODE_ONE`) 시 끊김, 생성된 `index.m3u8`이 `#EXT-X-ENDLIST`는 있고 `#EXT-X-PLAYLIST-TYPE:VOD`는 없는 점이 총 길이 표시에 미치는 영향
 * 100MB 업로드의 저속망·절전 상태 동작
+
+**Task 5-6 확인 결과 (2026-11-17, 에뮬레이터 `Medium_Phone_API_37.0`, Android 17 / API 37, 빌드 debug)**
+
+확인됨(에뮬레이터)
+* 알림 권한: 데이터 초기화 후 첫 재생 클릭에서 시스템 다이얼로그가 1회 표시됨. **거부해도 재생은 계속**(`dumpsys media_session` PLAYING, position 증가)되고 다른 곡을 재생해도 다이얼로그가 다시 뜨지 않음. 거부 상태에서도 서비스는 포그라운드(`isForeground=true`, 알림 레코드 존재)였고, 알림 표시 차단은 시스템 설정이므로 사용자에게 보이는 알림 컨트롤 제한 여부는 실기기에서 재확인 필요. `pm grant` 후 재생·알림 정상, 확인 뒤 허용 상태로 복구.
+* 홈 버튼(`KEYCODE_HOME`)·화면 끄기(`KEYCODE_POWER`, `mWakefulness=Asleep`) 후에도 PLAYING 유지, position 계속 증가.
+* 알림 창(퀵 설정 미디어 컨트롤)에 곡명·가수·재생/일시정지 버튼·진행바 표시. 일시정지 → `PAUSED`, 다시 누르면 `PLAYING`으로 복귀하고 앱 UI(미니 플레이어 아이콘)도 동기화됨.
+* 최근 앱에서 앱 제거: **재생 중이면** 재생·포그라운드 서비스 유지, **일시정지 중이면** 포그라운드 서비스와 알림이 사라지고 앱을 다시 열면 미니 플레이어가 비어 있음(§7.3 "재생 중이 아니면 종료"와 일치). Media3의 `isPlaybackOngoing`은 일시정지 뒤 10분간 true이고, 앱 프로세스의 `MediaController`가 바인딩되어 있으면 `stopSelf`만으로는 서비스가 남아서, `onTaskRemoved`에서 직접 판단하고 재생 목록을 비우도록 구현함(§16 #48).
+* 재생 오류: `/play` 성공 후 `adb kill-server`로 `adb reverse` 연결을 끊고 미버퍼 구간(4분 곡의 약 70% 지점)으로 시크하면 `PlaybackState`가 `ERROR(Source error)`가 되고, 목록 화면에 §3.4 문구 `재생 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.` 스낵바가 표시됨. 확장 플레이어가 열려 있으면 스낵바가 가려질 수 있음(닫으면 보임). 오류 상태의 같은 곡 재클릭은 `/play` 재호출 후 처음부터 재시작됨(`adb reverse` 복구 확인).
+* 오류를 만든 방법과 복구: `adb reverse --remove`만으로는 이미 맺어진 연결이 유지되어 오류가 나지 않음. 확인 후 `adb reverse tcp:80 tcp:80` 복구 확인(`adb reverse --list`). docker 스택은 건드리지 않음.
+
+확인하지 못함(실기기·Task 7-2)
+* 소리 출력, 잠금 화면 컨트롤, 블루투스 버튼, 전화 수신·오디오 포커스 충돌, Android 14+ `FOREGROUND_SERVICE_MEDIA_PLAYBACK`의 실기기 동작
+* 알림을 거부했을 때 알림 컨트롤이 사용자에게 실제로 어떻게 보이는지(에뮬레이터에서는 거부 상태에서도 서비스 알림 레코드가 존재함)
 
 **MVP 이후 과제**
 

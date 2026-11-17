@@ -79,6 +79,8 @@ class MediaControllerPlayerRepository @Inject constructor(
             if (isPlaying) startPositionUpdates() else stopPositionUpdates()
         }
 
+        override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) = syncStatus()
+
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) = syncStatus()
 
         override fun onRepeatModeChanged(repeatMode: Int) {
@@ -227,6 +229,13 @@ class MediaControllerPlayerRepository @Inject constructor(
 
     private fun syncStatus() {
         val c = controller ?: return
+        // 서비스가 재생 목록을 비웠다(최근 앱 제거 등). 남아 있는 곡 정보로 미니 플레이어가 유령처럼 남지 않게 초기화한다.
+        if (c.mediaItemCount == 0 && _state.value.currentTrack != null && _state.value.status != PlaybackStatus.Loading) {
+            stopPositionUpdates()
+            _state.update { PlayerState(repeatOne = it.repeatOne, volume = it.volume) }
+            _positionMs.value = 0L
+            return
+        }
         val mapped = mapPlaybackStatus(c.playbackState, c.isPlaying, c.playWhenReady)
         val duration = c.duration.takeIf { it != C.TIME_UNSET && it > 0 }
         _state.update { current ->

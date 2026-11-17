@@ -12,6 +12,7 @@ import com.example.musicapp.player.PlayerRepository
 import com.example.musicapp.player.PlayerState
 import com.example.musicapp.ui.MessageBus
 import com.example.musicapp.ui.MessageKind
+import com.example.musicapp.ui.PLAYBACK_ERROR_MESSAGE
 import com.example.musicapp.ui.TRACK_FAILED_MESSAGE
 import com.example.musicapp.ui.UiMessage
 import com.example.musicapp.ui.getErrorMessage
@@ -36,7 +37,16 @@ sealed interface PlayerEvent {
 
     /** 404. 목록을 새로고침한다. */
     data object ListRefreshRequested : PlayerEvent
+
+    /** 재생 시작 클릭. Activity가 알림 권한 요청 여부를 판단한다(PRD §7.3). */
+    data object RequestNotificationPermission : PlayerEvent
 }
+
+private const val PLAYBACK_ERROR_ID = "PLAYBACK_ERROR"
+
+/** 재생 오류 스낵바는 상태가 Error로 전이되는 순간에만 1회 띄운다. */
+fun shouldNotifyPlaybackError(prev: PlaybackStatus, next: PlaybackStatus): Boolean =
+    next == PlaybackStatus.Error && prev != PlaybackStatus.Error
 
 /** 행 클릭에 대한 결정. */
 sealed interface PlayAction {
@@ -104,6 +114,22 @@ class PlayerViewModel @Inject constructor(
     private var playJob: Job? = null
     private var pendingTrackId: String? = null
 
+    init {
+        // 재생 오류(onPlayerError·컨트롤러 연결 실패)를 스낵바로 알린다. 서버·예외 메시지는 쓰지 않는다.
+        var prevStatus = playerRepository.state.value.status
+        viewModelScope.launch {
+            playerRepository.state
+                .map { it.status }
+                .distinctUntilChanged()
+                .collect { status ->
+                    if (shouldNotifyPlaybackError(prevStatus, status)) {
+                        postMessage(PLAYBACK_ERROR_ID, PLAYBACK_ERROR_MESSAGE)
+                    }
+                    prevStatus = status
+                }
+        }
+    }
+
     /** 미니 플레이어 재생/일시정지 버튼. `/play`는 호출하지 않는다. */
     fun onTogglePlayPause() = playerRepository.togglePlayPause()
 
@@ -120,7 +146,10 @@ class PlayerViewModel @Inject constructor(
 
     fun onTrackClick(track: TrackResponse) {
         when (val action = decidePlayAction(track, playerRepository.state.value, pendingTrackId)) {
-            PlayAction.Start -> startPlay(track.trackId)
+            PlayAction.Start -> {
+                eventChannel.trySend(PlayerEvent.RequestNotificationPermission)
+                startPlay(track.trackId)
+            }
             PlayAction.Toggle -> playerRepository.togglePlayPause()
             PlayAction.Ignore -> Unit
             is PlayAction.Notify -> postMessage(action.id, action.text)

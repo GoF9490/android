@@ -11,6 +11,7 @@ import com.example.musicapp.player.PlaybackStatus
 import com.example.musicapp.player.PlayerRepository
 import com.example.musicapp.player.PlayerState
 import com.example.musicapp.ui.MessageBus
+import com.example.musicapp.ui.PLAYBACK_ERROR_MESSAGE
 import com.example.musicapp.ui.TRACK_FAILED_MESSAGE
 import com.example.musicapp.ui.UiMessage
 import com.example.musicapp.ui.getErrorMessage
@@ -306,6 +307,7 @@ class PlayerViewModelTest {
         viewModel.events.test {
             viewModel.onTrackClick(track("a"))
             advanceUntilIdle()
+            assertEquals(PlayerEvent.RequestNotificationPermission, awaitItem())
             val event = awaitItem() as PlayerEvent.TrackRefreshed
             assertSame(fresh, event.track)
             cancelAndIgnoreRemainingEvents()
@@ -323,6 +325,7 @@ class PlayerViewModelTest {
         viewModel.events.test {
             viewModel.onTrackClick(track("a"))
             advanceUntilIdle()
+            assertEquals(PlayerEvent.RequestNotificationPermission, awaitItem())
             expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
@@ -337,6 +340,7 @@ class PlayerViewModelTest {
         viewModel.events.test {
             viewModel.onTrackClick(track("a"))
             advanceUntilIdle()
+            assertEquals(PlayerEvent.RequestNotificationPermission, awaitItem())
             assertEquals(PlayerEvent.ListRefreshRequested, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
@@ -367,6 +371,69 @@ class PlayerViewModelTest {
 
         coVerify(exactly = 2) { trackRepository.getPlayInfo("a") }
         assertEquals(listOf(play("a")), player.played)
+    }
+
+    @Test
+    fun 재생_시작_클릭에서만_알림_권한_이벤트를_낸다() = runTest(dispatcher) {
+        coEvery { trackRepository.getPlayInfo("a") } returns play("a")
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            setPlayerState("a", PlaybackStatus.Playing)
+            viewModel.onTrackClick(track("a")) // Toggle
+            viewModel.onTrackClick(track("p", TrackStatus.PENDING)) // Notify
+            setPlayerState("a", PlaybackStatus.Loading)
+            viewModel.onTrackClick(track("a")) // Ignore
+            advanceUntilIdle()
+            expectNoEvents()
+            setPlayerState("a", PlaybackStatus.Error)
+            viewModel.onTrackClick(track("a")) // Start
+            advanceUntilIdle()
+            assertEquals(PlayerEvent.RequestNotificationPermission, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun Error로_전이될_때만_재생_오류_스낵바를_1회_띄운다() = runTest(dispatcher) {
+        createViewModel()
+        advanceUntilIdle()
+
+        setPlayerState("a", PlaybackStatus.Loading)
+        advanceUntilIdle()
+        assertEquals(emptyList<UiMessage>(), messages)
+
+        setPlayerState("a", PlaybackStatus.Error)
+        advanceUntilIdle()
+        // Error 유지 중 다른 필드가 바뀌어도 다시 띄우지 않는다
+        player.mutableState.value = player.mutableState.value.copy(volume = 0.5f)
+        advanceUntilIdle()
+        assertEquals(listOf(PLAYBACK_ERROR_MESSAGE), messages.map { it.text })
+
+        // 재시도 후 다시 Error가 되면 다시 띄운다
+        setPlayerState("a", PlaybackStatus.Loading)
+        advanceUntilIdle()
+        setPlayerState("a", PlaybackStatus.Error)
+        advanceUntilIdle()
+        assertEquals(2, messages.size)
+    }
+
+    @Test
+    fun 생성_시점에_이미_Error여도_스낵바를_띄우지_않는다() = runTest(dispatcher) {
+        setPlayerState("a", PlaybackStatus.Error)
+        createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(emptyList<UiMessage>(), messages)
+    }
+
+    @Test
+    fun shouldNotifyPlaybackError_표() {
+        assertEquals(true, shouldNotifyPlaybackError(PlaybackStatus.Loading, PlaybackStatus.Error))
+        assertEquals(true, shouldNotifyPlaybackError(PlaybackStatus.Playing, PlaybackStatus.Error))
+        assertEquals(false, shouldNotifyPlaybackError(PlaybackStatus.Error, PlaybackStatus.Error))
+        assertEquals(false, shouldNotifyPlaybackError(PlaybackStatus.Error, PlaybackStatus.Loading))
+        assertEquals(false, shouldNotifyPlaybackError(PlaybackStatus.Idle, PlaybackStatus.Playing))
     }
 
     @Test

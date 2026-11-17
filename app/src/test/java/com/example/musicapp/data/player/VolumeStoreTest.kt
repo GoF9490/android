@@ -11,7 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /** 메모리 DataStore(실제 파일 DataStore는 Windows에서 rename이 실패해 쓰지 않는다). */
-private class FakeDataStore : DataStore<Preferences> {
+internal class FakeDataStore : DataStore<Preferences> {
     private val state = MutableStateFlow(emptyPreferences())
     override val data = state
 
