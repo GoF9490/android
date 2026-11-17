@@ -11,7 +11,12 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicapp.feature.auth.AuthAction
 import com.example.musicapp.feature.auth.AuthViewModel
@@ -61,6 +66,15 @@ class MainActivity : ComponentActivity() {
             MusicAppTheme {
                 val authState by authViewModel.authState.collectAsStateWithLifecycle()
                 val trackListState by trackListViewModel.state.collectAsStateWithLifecycle()
+                val expiredIds by trackListViewModel.poller.expiredIds.collectAsStateWithLifecycle()
+                val statusScope = rememberCoroutineScope()
+                // 변환 상태 폴링: 앱이 STARTED일 때만 돌고 백그라운드에서는 취소된다(PRD §6.3)
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(lifecycleOwner) {
+                    lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        trackListViewModel.poller.run()
+                    }
+                }
                 MainScreen(
                     messageBus = messageBus,
                     topBar = {
@@ -86,6 +100,9 @@ class MainActivity : ComponentActivity() {
                         onLoadMore = trackListViewModel::loadNextPage,
                         onRefresh = trackListViewModel::refresh,
                         contentPadding = padding,
+                        expiredIds = expiredIds,
+                        onVisibleIdsChange = trackListViewModel.poller::updateVisibleIds,
+                        onStatusRefreshClick = { id -> statusScope.launch { trackListViewModel.poller.refreshOne(id) } },
                     )
                 }
             }

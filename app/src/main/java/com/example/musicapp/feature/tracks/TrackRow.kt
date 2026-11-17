@@ -13,9 +13,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,6 +37,9 @@ fun TrackRow(
     onClick: () -> Unit,
     onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 자동 폴링이 멈춘 변환 중 행이면 true. 뱃지 옆에 `상태 새로고침` 버튼을 보인다. */
+    showStatusRefresh: Boolean = false,
+    onStatusRefreshClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -61,7 +67,20 @@ fun TrackRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            StatusBadge(status = track.status)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusBadge(status = track.status)
+                if (showStatusRefresh) {
+                    // 48dp 터치 영역 확보를 위해 최소 크기를 지정하고, 텍스트로 의미를 전달한다
+                    TextButton(
+                        onClick = onStatusRefreshClick,
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .semantics { contentDescription = "${track.title} 변환 상태 새로고침" },
+                    ) {
+                        Text("상태 새로고침", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+            }
         }
         IconButton(onClick = onDownloadClick) {
             Icon(

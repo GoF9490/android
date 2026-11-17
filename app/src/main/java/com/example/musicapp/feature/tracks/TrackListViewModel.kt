@@ -3,6 +3,7 @@ package com.example.musicapp.feature.tracks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicapp.data.api.ApiException
+import com.example.musicapp.data.api.ErrorCode
 import com.example.musicapp.data.api.model.TrackResponse
 import com.example.musicapp.data.tracks.TrackRepository
 import com.example.musicapp.ui.MessageBus
@@ -57,6 +58,15 @@ class TrackListViewModel @Inject constructor(
     private var generation = 0
     private var firstPageJob: Job? = null
     private var nextPageJob: Job? = null
+
+    /** 변환 상태 폴링(PRD §6.3). 구동은 화면이 `repeatOnLifecycle(STARTED)`에서 `run()`으로 한다. */
+    val poller = TrackStatusPoller(
+        getTrack = repository::getTrack,
+        getTracks = { mutableState.value.tracks },
+        onTrackUpdated = ::updateTrack,
+        onTrackNotFound = ::handleTrackNotFound,
+        elapsedRealtimeMillis = { System.nanoTime() / 1_000_000 },
+    )
 
     init {
         observeKeyword()
@@ -128,6 +138,12 @@ class TrackListViewModel @Inject constructor(
                 state.copy(tracks = state.tracks.map { if (it.trackId == track.trackId) track else it })
             }
         }
+    }
+
+    /** 폴링 중 404: 목록을 새로고침하고 안내 스낵바를 띄운다. */
+    private fun handleTrackNotFound() {
+        postError(ApiException(404, ErrorCode.TRACK_NOT_FOUND))
+        refresh()
     }
 
     private fun loadFirstPage() {

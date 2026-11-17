@@ -64,8 +64,19 @@ fun TrackList(
     onRefresh: () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
+    expiredIds: Set<String> = emptySet(),
+    onVisibleIdsChange: (Set<String>) -> Unit = {},
+    onStatusRefreshClick: (String) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
+    val currentVisibleIdsChange by rememberUpdatedState(onVisibleIdsChange)
+
+    // 화면에 보이는 행을 폴링 대상 판단용으로 알린다(key가 trackId)
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.mapNotNullTo(HashSet()) { it.key as? String } }
+            .distinctUntilChanged()
+            .collect { currentVisibleIdsChange(it) }
+    }
     val currentLoadMore by rememberUpdatedState(onLoadMore)
     val currentCount by rememberUpdatedState(state.tracks.size)
 
@@ -121,6 +132,8 @@ fun TrackList(
                         artworkUrl = track.artworkUrl?.let { resolveMediaUrl(baseUrl, it) },
                         onClick = { onTrackClick(track) },
                         onDownloadClick = { onDownloadClick(track) },
+                        showStatusRefresh = track.trackId in expiredIds,
+                        onStatusRefreshClick = { onStatusRefreshClick(track.trackId) },
                     )
                 }
                 if (state.isLoadingMore) {

@@ -499,6 +499,7 @@ android/
 | 34 | 상단바 인증 슬롯 세부 미정 | **`Loading` 중에는 슬롯을 비움. `AuthAction`은 상태·콜백을 주입받는 stateless 컴포저블이고 `AuthViewModel`은 Activity가 `collectAsStateWithLifecycle`로 구독해 전달(`hilt-navigation-compose` 미도입). 로그인 다이얼로그 표시 여부는 `AuthAction` 내부 `rememberSaveable`, `launchLogin`은 Activity에서 호출. 아바타는 `profileImageUrl`(절대 URL)을 Coil로 로딩하고 null·실패 시 기본 아이콘, 메뉴는 `업로드`(콜백만, Task 016)·`로그아웃`(서버 호출 없이 토큰 삭제)** | 프로필 이미지는 외부 호스트·다른 포트라 `Authorization`이 붙지 않음(Task 006) (Task 009) |
 | 35 | 목록 상태·오류 정책 세부 미정 | **`TrackListViewModel`은 첫 페이지 조회마다 세대 번호를 올려 취소 시점을 놓친 늦은 응답도 폐기. 첫 페이지 실패는 `error`(`ApiException`) 설정 + 스낵바(id=오류 코드명), 이전 목록 유지. 다음 페이지 실패는 `error` 없이 스낵바만 띄우고 목록 보존, 자동 재시도 없이 다음 스크롤에서 `loadNextPage()` 재시도. 4xx는 재시도하지 않고 `error`가 있으면 `loadNextPage`는 무시(`refresh()`로 복구). 이어 붙일 때 `trackId` 중복은 제외** | 서버 목록이 페이지 사이에 밀려도 중복 행이 없고, 일시 오류가 목록을 지우지 않음 (Task 3-1) |
 | 36 | 목록 UI 세부 미정 | **빈 상태·오류 문구는 웹과 동일(`업로드된 곡이 없습니다.`, `검색 결과가 없습니다.`, 첫 페이지 오류 시 `다시 시도` 버튼 + `getErrorMessage` 문구). `UNKNOWN` 뱃지는 `변환 실패`(warning 색). 검색창과 본문은 `MainActivity`가 만든 같은 `TrackListViewModel` 상태를 공유. 끝에서 5개 전에 `loadNextPage`, 새 결과의 첫 트랙이 바뀌면 맨 위로 스크롤** | 웹과 같은 문구, 상단바 검색창과 본문의 상태 공유 (Task 3-2) |
+| 37 | 변환 상태 폴링 세부 미정 | **`TrackStatusPoller`는 단일 루프로 보이는 PENDING/PROCESSING 행을 순차 조회하고, "5초마다"는 조회 종료 후 5초 대기. 30분 상한은 행이 처음 대상이 된 시각부터 주입 시계(벽시계, 백그라운드 시간 포함) 기준이며 초과 행은 `상태 새로고침` 버튼, 누르면 1회 조회 후 타이머 재시작. 404는 행당 1회 목록 새로고침 + 스낵바. `UNKNOWN`은 폴링 대상 아님. 행이 보이지 않게 되면 추적 정보 폐기** | 재시도 인터셉터와 요청이 겹치지 않게 하고 단순하게 유지 (Task 3-3) |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
 
