@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 4 진행 중 (15/28 Tasks 완료)
+**📊 진행 상황**: Phase 5 대기 (16/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -157,7 +157,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §6.3 / API.md §1.4, §3.5
   - 주의: [계획] "화면에 보이는 행" 판단은 `LazyListState`의 visible items로 하거나 행 Composable의 수명(`LaunchedEffect`)에 묶는다. 어느 쪽이든 로직은 테스트 가능한 클래스로 분리한다. [검토] 폴링 조회에는 재시도 인터셉터(2회)와 5초 틱이 겹쳐 요청이 몰리지 않는지 확인.
 
-### Phase 4: 업로드
+### Phase 4: 업로드 ✅
 
 - **Task 4-1: 태그 추출과 사전 검증** ✅
   - 📋 `feature/upload/AudioTagReader.kt`: `MediaMetadataRetriever.setDataSource(context, uri)`로 제목·가수·앨범·`embeddedPicture`를 IO 디스패처에서 추출. 값은 `trim()` 후 빈 문자열이면 null. 실패하면 빈 결과 반환(예외를 밖으로 던지지 않음), `release()` 보장
@@ -190,7 +190,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §5.2, §5.3
   - 주의: [구현] 내장 커버는 미리보기 전용이다. 서버로 보내지 않는다. placeholder 값(`Unknown Artist` 등)을 서버로 보내지 않는다. [계획] `AudioTagReader`는 인터페이스로 주입해 테스트에서 가짜로 대체한다.
 
-- **Task 4-4: 업로드 다이얼로그 UI**
+- **Task 4-4: 업로드 다이얼로그 UI** ✅
   - 📋 `feature/upload/UploadDialog.kt`: 음원 선택(`OpenDocument`, MIME `audio/*`), 자켓 영역(탭하면 `PickVisualMedia.ImageOnly`, 없으면 음표 플레이스홀더), 제목·가수·앨범 입력칸, `[저장]`·`취소`
   - 📋 전송 중 UI: 진행률(%) 표시, `[저장]` 비활성, `전송 취소` 버튼, 100% 후 `서버에서 처리 중...`. 전송 중 닫기 시도(뒤로 가기·바깥 탭·`취소`)는 확인 대화상자(`계속 업로드` / `전송 취소하고 닫기`)
   - 📋 인라인 오류 표시, 사전 검증 오류 즉시 안내
