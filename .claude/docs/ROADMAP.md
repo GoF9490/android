@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 3 진행 중 (10/28 Tasks 완료)
+**📊 진행 상황**: Phase 3 진행 중 (11/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -136,7 +136,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §6.1, §6.2 / API.md §3.4
   - 주의: [계획] Paging3를 쓰지 않는다(PRD §16 #16). [구현] 오류 시 스낵바는 `MessageBus`로, 4xx는 재시도하지 않는다.
 
-- **Task 3-2: 트랙 목록 UI**
+- **Task 3-2: 트랙 목록 UI** ✅
   - 📋 `feature/tracks/SearchBar.kt`: 알약형 검색창(`#212121`, placeholder `노래 제목 또는 가수를 검색하세요...`), 상단바 슬롯에 배치
   - 📋 `feature/tracks/TrackRow.kt`: 썸네일(`Artwork`), 제목(흰색 굵게, 한 줄 말줄임), `노래 • {가수} • {재생시간}`, 상태 뱃지, 우측 다운로드 아이콘 버튼(콜백만 노출, 동작은 Task 6-1)
   - 📋 `feature/tracks/StatusBadge.kt`: `PENDING`/`PROCESSING` → `변환 중...`, `FAILED` → `변환 실패`(warning 색), `READY` → 없음
