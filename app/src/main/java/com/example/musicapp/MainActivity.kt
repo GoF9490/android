@@ -29,6 +29,8 @@ import com.example.musicapp.ui.getLoginErrorMessage
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.musicapp.feature.player.PlayerEvent
+import com.example.musicapp.feature.player.PlayerViewModel
 import com.example.musicapp.feature.tracks.SearchBar
 import com.example.musicapp.feature.upload.UploadDialogHost
 import com.example.musicapp.feature.upload.UploadViewModel
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val trackListViewModel: TrackListViewModel by viewModels()
     private val uploadViewModel: UploadViewModel by viewModels()
+    private val playerViewModel: PlayerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +94,15 @@ class MainActivity : ComponentActivity() {
                         trackListViewModel.poller.run()
                     }
                 }
+                // 재생 시작 오류에 따른 목록 갱신을 중계한다(PRD §7.1)
+                LaunchedEffect(Unit) {
+                    playerViewModel.events.collect { event ->
+                        when (event) {
+                            is PlayerEvent.TrackRefreshed -> trackListViewModel.updateTrack(event.track)
+                            PlayerEvent.ListRefreshRequested -> trackListViewModel.refresh()
+                        }
+                    }
+                }
                 MainScreen(
                     messageBus = messageBus,
                     topBar = {
@@ -118,7 +130,7 @@ class MainActivity : ComponentActivity() {
                     TrackList(
                         state = trackListState,
                         baseUrl = BuildConfig.BASE_URL,
-                        onTrackClick = {}, // 재생은 Task 5-3
+                        onTrackClick = playerViewModel::onTrackClick,
                         onDownloadClick = {}, // 다운로드는 Task 6-1
                         onLoadMore = trackListViewModel::loadNextPage,
                         onRefresh = trackListViewModel::refresh,

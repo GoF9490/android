@@ -1,6 +1,7 @@
 package com.example.musicapp.data.tracks
 
 import com.example.musicapp.data.api.MusicApi
+import com.example.musicapp.data.api.model.StreamPlayResponse
 import com.example.musicapp.data.api.model.TrackPageResponse
 import com.example.musicapp.data.api.model.TrackResponse
 import com.example.musicapp.data.api.normalizeError
@@ -33,6 +34,15 @@ class TrackRepository @Inject constructor(
     suspend fun getTrack(trackId: String): TrackResponse {
         try {
             return api.getTrack(trackId)
+        } catch (t: Throwable) {
+            throw normalizeError(t)
+        }
+    }
+
+    /** 재생 정보 조회. 호출마다 STREAM 이력이 쌓이므로 재생 시작 1회당 1번만 부른다. */
+    suspend fun getPlayInfo(trackId: String): StreamPlayResponse {
+        try {
+            return api.getPlayInfo(trackId)
         } catch (t: Throwable) {
             throw normalizeError(t)
         }

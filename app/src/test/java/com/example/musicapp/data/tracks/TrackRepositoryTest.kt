@@ -57,7 +57,21 @@ class TrackRepositoryTest {
     }
 
     @Test
-    fun 취소_예외는_변환하지_않는다() = runTest {
+    fun getPlayInfo는_트랙_id로_1회_호출하고_오류를_정규화한다() = runTest {
+        val play = com.example.musicapp.data.api.model.StreamPlayResponse("t1", "/s/t1.m3u8", "제목", "가수", 10)
+        coEvery { api.getPlayInfo("t1") } returns play
+        assertEquals(play, repository.getPlayInfo("t1"))
+        coVerify(exactly = 1) { api.getPlayInfo("t1") }
+
+        coEvery { api.getPlayInfo("t2") } throws IOException("끊김")
+        val e = assertThrows(ApiException::class.java) {
+            kotlinx.coroutines.runBlocking { repository.getPlayInfo("t2") }
+        }
+        assertEquals(ErrorCode.NETWORK_ERROR, e.code)
+    }
+
+    @Test
+    fun 취소_예외는_변환하지_않는다()= runTest {
         coEvery { api.getTrack(any()) } throws CancellationException("취소")
 
         assertThrows(CancellationException::class.java) {

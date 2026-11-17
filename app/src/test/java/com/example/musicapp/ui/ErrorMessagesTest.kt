@@ -35,6 +35,11 @@ class ErrorMessagesTest {
     }
 
     @Test
+    fun 변환_실패_문구가_PRD_표와_같다() {
+        assertEquals("변환에 실패한 곡입니다", TRACK_FAILED_MESSAGE)
+    }
+
+    @Test
     fun 로그인_오류_문구가_PRD_표와_같다() {
         val serverError = "로그인 서버에 문제가 있습니다. 잠시 후 다시 시도해 주세요."
         val expected = mapOf(

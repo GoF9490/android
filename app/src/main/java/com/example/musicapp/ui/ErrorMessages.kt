@@ -5,6 +5,9 @@ import com.example.musicapp.data.api.ErrorCode
 /** 재생 오류(PlaybackException) 문구. PRD §3.4 */
 const val PLAYBACK_ERROR_MESSAGE = "재생 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
 
+/** 변환 실패 곡 재생 시도 문구. PRD §6.3 */
+const val TRACK_FAILED_MESSAGE = "변환에 실패한 곡입니다"
+
 private const val LOGIN_FAILED_MESSAGE = "로그인에 실패했습니다. 다시 시도해 주세요."
 
 /** 오류 코드 → 사용자 문구(PRD §3.4). 코드가 추가되면 컴파일 오류로 누락을 막는다. */
