@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 3 진행 중 (11/28 Tasks 완료)
+**📊 진행 상황**: Phase 4 대기 (12/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -124,7 +124,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §3.1 상단, §5 서두, §9.1, §9.3
   - 주의: [구현] 아이콘 버튼에 `contentDescription`을 넣는다. 구글 프로필 이미지 요청에는 `Authorization`이 붙지 않아야 한다(Task 2-1 규칙).
 
-### Phase 3: 목록·검색
+### Phase 3: 목록·검색 ✅
 
 - **Task 3-1: 트랙 목록 상태 관리** ✅
   - 📋 `data/tracks/TrackRepository.kt`: `getTracks(keyword, page)`(size 20), `getTrack(trackId)`. 오류는 `ApiException`으로 정규화
@@ -147,7 +147,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §6.1, §6.2, §6.3, §9
   - 주의: [구현] 다운로드 버튼 탭이 행 클릭으로 전달되지 않게 한다. 색만으로 상태를 전달하지 않는다(뱃지는 텍스트 포함). [검토] 한글 입력(IME 조합) 중 검색이 정상 동작하는지 확인.
 
-- **Task 3-3: 변환 상태 폴링**
+- **Task 3-3: 변환 상태 폴링** ✅
   - 📋 `feature/tracks/TrackStatusPoller.kt`: 화면에 보이는 `PENDING`/`PROCESSING` 트랙을 5초마다 `getTrack`으로 조회해 `TrackListViewModel.updateTrack`으로 반영(목록 전체 재조회 없음)
   - 📋 중단 조건: `READY`/`FAILED` 도달, 행이 화면에서 사라짐, `404`(목록 새로고침 + 스낵바), 폴링 시작 후 30분 경과(뱃지 옆 `상태 새로고침` 버튼 표시, 누르면 1회 조회 후 폴링 재개)
   - 📋 5xx·네트워크 오류는 알림 없이 다음 틱에서 재시도. 앱이 백그라운드면 중지(`repeatOnLifecycle(STARTED)`), 복귀 시 재개
