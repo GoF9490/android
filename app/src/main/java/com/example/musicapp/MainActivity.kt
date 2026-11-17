@@ -21,10 +21,12 @@ import com.example.musicapp.feature.auth.parseDeepLink
 import com.example.musicapp.ui.MessageKind
 import com.example.musicapp.ui.UiMessage
 import com.example.musicapp.ui.getLoginErrorMessage
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.musicapp.feature.tracks.SearchBar
+import com.example.musicapp.feature.tracks.TrackList
+import com.example.musicapp.feature.tracks.TrackListViewModel
 import com.example.musicapp.ui.MainScreen
 import com.example.musicapp.ui.MessageBus
 import com.example.musicapp.ui.theme.MusicAppTheme
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
     lateinit var messageBus: MessageBus
 
     private val authViewModel: AuthViewModel by viewModels()
+    private val trackListViewModel: TrackListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +60,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             MusicAppTheme {
                 val authState by authViewModel.authState.collectAsStateWithLifecycle()
+                val trackListState by trackListViewModel.state.collectAsStateWithLifecycle()
                 MainScreen(
                     messageBus = messageBus,
                     topBar = {
-                        // 이후 Task 011에서 검색창(weight 1f)으로 대체한다
-                        Spacer(Modifier.weight(1f))
+                        SearchBar(
+                            keyword = trackListState.keyword,
+                            onKeywordChange = trackListViewModel::updateKeyword,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Spacer(Modifier.width(8.dp))
                         AuthAction(
                             authState = authState,
                             onLoginClick = ::handleLoginClick,
@@ -70,8 +78,15 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                 ) { padding ->
-                    // 본문 슬롯: 이후 Task에서 트랙 목록으로 채운다
-                    Box(modifier = Modifier.fillMaxSize().padding(padding))
+                    TrackList(
+                        state = trackListState,
+                        baseUrl = BuildConfig.BASE_URL,
+                        onTrackClick = {}, // 재생은 Task 5-3
+                        onDownloadClick = {}, // 다운로드는 Task 6-1
+                        onLoadMore = trackListViewModel::loadNextPage,
+                        onRefresh = trackListViewModel::refresh,
+                        contentPadding = padding,
+                    )
                 }
             }
         }
