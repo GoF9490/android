@@ -11,7 +11,12 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.LaunchedEffect
+import com.example.musicapp.feature.player.MiniPlayerHost
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -78,6 +83,8 @@ class MainActivity : ComponentActivity() {
                 val trackListState by trackListViewModel.state.collectAsStateWithLifecycle()
                 val expiredIds by trackListViewModel.poller.expiredIds.collectAsStateWithLifecycle()
                 val statusScope = rememberCoroutineScope()
+                // 현재 곡 id만 구독해 재생/일시정지·위치 변화로는 목록이 다시 그려지지 않게 한다
+                val currentTrackId by playerViewModel.currentTrackId.collectAsStateWithLifecycle()
                 var showUpload by rememberSaveable { mutableStateOf(false) }
                 // 로그인 상태에서만 업로드 다이얼로그를 보인다. 로그아웃되면 상태를 초기화하고 닫는다
                 val canUpload = authState is AuthState.LoggedIn
@@ -119,6 +126,18 @@ class MainActivity : ComponentActivity() {
                             onLogoutClick = authViewModel::handleLogout,
                         )
                     },
+                    // 곡을 고르기 전에는 슬롯 자체를 두지 않는다
+                    playerBar = if (currentTrackId != null) {
+                        {
+                            MiniPlayerHost(
+                                viewModel = playerViewModel,
+                                baseUrl = BuildConfig.BASE_URL,
+                                onOpenClick = {}, // 확장 플레이어는 Task 5-5
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 ) { padding ->
                     if (showUpload && canUpload) {
                         UploadDialogHost(
@@ -127,6 +146,12 @@ class MainActivity : ComponentActivity() {
                             onCompleted = trackListViewModel::refresh,
                         )
                     }
+                    // 플레이어 바가 없으면 Scaffold 하단 패딩이 0이므로 내비게이션 바 높이로 보정한다
+                    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    val listPadding = PaddingValues(
+                        top = padding.calculateTopPadding(),
+                        bottom = maxOf(padding.calculateBottomPadding(), navBottom),
+                    )
                     TrackList(
                         state = trackListState,
                         baseUrl = BuildConfig.BASE_URL,
@@ -134,7 +159,8 @@ class MainActivity : ComponentActivity() {
                         onDownloadClick = {}, // 다운로드는 Task 6-1
                         onLoadMore = trackListViewModel::loadNextPage,
                         onRefresh = trackListViewModel::refresh,
-                        contentPadding = padding,
+                        contentPadding = listPadding,
+                        currentTrackId = currentTrackId,
                         expiredIds = expiredIds,
                         onVisibleIdsChange = trackListViewModel.poller::updateVisibleIds,
                         onStatusRefreshClick = { id -> statusScope.launch { trackListViewModel.poller.refreshOne(id) } },

@@ -21,6 +21,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -83,9 +88,24 @@ class PlayerViewModel @Inject constructor(
     private val eventChannel = Channel<PlayerEvent>(Channel.BUFFERED)
     val events: Flow<PlayerEvent> = eventChannel.receiveAsFlow()
 
+    /** 재생 상태. 단일 출처는 PlayerRepository이며 UI는 여기로만 구독한다. */
+    val playerState: StateFlow<PlayerState> = playerRepository.state
+
+    /** 현재 곡 id만 따로 노출한다. 재생/일시정지 변화로는 목록이 다시 그려지지 않게 한다. */
+    val currentTrackId: StateFlow<String?> = playerRepository.state
+        .map { it.currentTrack?.trackId }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, playerRepository.state.value.currentTrack?.trackId)
+
+    /** 재생 중 약 500ms 간격으로 갱신되는 위치(ms). 진행바 안에서만 읽는다. */
+    val positionMs: StateFlow<Long> = playerRepository.positionMs
+
     private var requestId = 0
     private var playJob: Job? = null
     private var pendingTrackId: String? = null
+
+    /** 미니 플레이어 재생/일시정지 버튼. `/play`는 호출하지 않는다. */
+    fun onTogglePlayPause() = playerRepository.togglePlayPause()
 
     fun onTrackClick(track: TrackResponse) {
         when (val action = decidePlayAction(track, playerRepository.state.value, pendingTrackId)) {

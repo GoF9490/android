@@ -17,7 +17,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,14 +41,24 @@ fun TrackRow(
     onClick: () -> Unit,
     onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 현재 재생 곡이면 true. 좌측 accent 바(모양)와 상태 설명으로 표시한다. 제목은 흰색을 유지한다. */
+    isCurrent: Boolean = false,
     /** 자동 폴링이 멈춘 변환 중 행이면 true. 뱃지 옆에 `상태 새로고침` 버튼을 보인다. */
     showStatusRefresh: Boolean = false,
     onStatusRefreshClick: () -> Unit = {},
 ) {
+    val accentColor = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
+            .semantics {
+                selected = isCurrent
+                if (isCurrent) stateDescription = "현재 재생 중"
+            }
+            .drawBehind {
+                if (isCurrent) drawRect(accentColor, size = Size(4.dp.toPx(), size.height))
+            }
             .heightIn(min = 64.dp)
             .padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

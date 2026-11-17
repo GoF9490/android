@@ -64,6 +64,7 @@ fun TrackList(
     onRefresh: () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
+    currentTrackId: String? = null,
     expiredIds: Set<String> = emptySet(),
     onVisibleIdsChange: (Set<String>) -> Unit = {},
     onStatusRefreshClick: (String) -> Unit = {},
@@ -132,6 +133,7 @@ fun TrackList(
                         artworkUrl = track.artworkUrl?.let { resolveMediaUrl(baseUrl, it) },
                         onClick = { onTrackClick(track) },
                         onDownloadClick = { onDownloadClick(track) },
+                        isCurrent = track.trackId == currentTrackId,
                         showStatusRefresh = track.trackId in expiredIds,
                         onStatusRefreshClick = { onStatusRefreshClick(track.trackId) },
                     )

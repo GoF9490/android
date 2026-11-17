@@ -506,6 +506,7 @@ android/
 | 41 | 업로드 다이얼로그 UI 세부 미정 | **전송 중 문구 `업로드 중... {n}%`(웹과 동일), 100% 이후 `서버에서 처리 중...`. 글자 수 초과는 입력을 막지 않고 저장 시 인라인 오류. 라벨은 입력칸 위에 따로 두어 placeholder가 항상 보이게 함. 다이얼로그는 `Dialog`, 전송 중 닫기 요청만 확인 대화상자(`계속 업로드`/`전송 취소하고 닫기`). `UploadViewModel`은 Activity 범위로 두고 닫을 때 `reset()`** | 회전에 전송이 끊기지 않게 하고, `accent` 빨강은 텍스트 색으로 쓰지 않으므로 버튼 글자는 본문 색 사용 |
 | 43 | `UNKNOWN` 상태 곡 클릭 문구 미정 | **`INTERNAL_ERROR` 문구(`서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.`) 스낵바만 띄우고 재생하지 않음**(#26 일반 오류 취급) | PRD에 전용 문구가 없음 (Task 5-3) |
 | 44 | `PlayerViewModel`과 목록 협력 방식 미정 | **`PlayerViewModel.events`(Channel 기반)가 409 재조회 결과(`TrackRefreshed`)·404(`ListRefreshRequested`)를 발행하고 `MainActivity`가 `TrackListViewModel.updateTrack`/`refresh`로 중계. 두 ViewModel은 서로를 참조하지 않음. 응답 대기 중 다른 곡 클릭은 이전 요청을 취소·폐기(requestId)하고 같은 곡 클릭은 무시. 행 클릭 분기는 순수 함수 `decidePlayAction`** | 생명주기가 다른 콜백 보관 없이 테스트 가능하게 (Task 5-3) |
+| 45 | 미니 플레이어 바 세부 미정 | **`PlayerViewModel`이 `playerState`·`positionMs`를 노출하고 `MiniPlayerHost`가 구독. 위치 State는 읽지 않고 람다로 넘겨 진행바 그리기 단계에서만 읽음. 진행바는 장식이라 접근성 트리에서 숨김(`clearAndSetSemantics`). 곡이 없으면 `playerBar` 슬롯을 null로 두고, 목록 하단 패딩은 `max(Scaffold 하단, 내비게이션 바)`로 보정. 현재 곡 행은 좌측 accent 바 + `선택됨`/`현재 재생 중` 상태 설명, 로딩 중에는 재생 버튼 자리에 인디케이터** | 500ms 갱신이 목록·바 본문 recomposition을 일으키지 않게 하고 낭독 소음 방지 (Task 5-4) |
 | 42 | `PlayerRepository` 세부 미정 | **`PlaybackStatus`는 최상위 enum. 컨트롤러 연결 전 호출은 큐에 쌓고 `play`는 최신 1개만 유지, 재생 중에만 500ms 위치 갱신**(Task 5-2) | `/play` 연타 시 마지막 곡만 재생되게 하고 ViewModel 테스트에서 Media3 타입을 배제 |
 
 ## 17. 통합 확인 항목과 MVP 이후 과제
