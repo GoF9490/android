@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 6 대기 (22/28 Tasks 완료)
+**📊 진행 상황**: Phase 6 진행 중 (23/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -265,7 +265,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
 
 ### Phase 6: 다운로드·마감
 
-- **Task 6-1: 원본 다운로드**
+- **Task 6-1: 원본 다운로드** ✅
   - 📋 `download/TrackDownloader.kt`: `DownloadManager.Request`로 `{BASE_URL}/api/tracks/{id}/download` 요청, 공용 `Downloads` 폴더 저장, 완료 알림 표시, 로그인 상태면 `addRequestHeader("Authorization", "Bearer …")`
   - 📋 저장 파일명: `Content-Disposition`이 적용되는지 에뮬레이터에서 실측한다. 적용되지 않으면 `originalFilename`을 목적지 파일명으로 지정하고 결과를 PRD §8·§16에 기록
   - 📋 API 28 이하용 `WRITE_EXTERNAL_STORAGE`(`maxSdkVersion="28"`) 선언과 런타임 요청
