@@ -1,7 +1,7 @@
 # Re-dubb Android 앱 ROADMAP
 
 **📅 최종 업데이트**: 2026-11-17
-**📊 진행 상황**: Phase 6 진행 중 (25/28 Tasks 완료)
+**📊 진행 상황**: Phase 7 대기 (26/28 Tasks 완료)
 **참고 문서**: `.claude/docs/PRD.md`, `.claude/docs/API.md`
 
 ## 개요
@@ -263,7 +263,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §7.2, §7.3, §17
   - 주의: [검토] 에뮬레이터에서 소리 확인이 어려우면 `PlayerState`의 위치 증가와 `adb shell dumpsys media_session`으로 재생 상태를 확인한다. 잠금 화면·블루투스·전화 수신은 실기기 항목이다(Task 7-2).
 
-### Phase 6: 다운로드·마감
+### Phase 6: 다운로드·마감 ✅
 
 - **Task 6-1: 원본 다운로드** ✅
   - 📋 `download/TrackDownloader.kt`: `DownloadManager.Request`로 `{BASE_URL}/api/tracks/{id}/download` 요청, 공용 `Downloads` 폴더 저장, 완료 알림 표시, 로그인 상태면 `addRequestHeader("Authorization", "Bearer …")`
@@ -293,7 +293,7 @@ Phase N은 PRD §18의 A(N-1) 단계에 대응한다. 환경 세팅과 프로젝
   - 관련 PRD: PRD.md §13
   - 주의: [계획] `hilt-android-testing` 등 새 의존성이 필요하면 결재 필요. 가능하면 Composable에 상태·콜백만 넘기는 구조를 활용해 의존성 추가 없이 테스트한다. [검토] 에뮬레이터가 없으면 완료 처리하지 말고 보고한다.
 
-- **Task 6-4: 앱 아이콘과 README·lint 정리**
+- **Task 6-4: 앱 아이콘과 README·lint 정리** ✅
   - 📋 앱 아이콘(adaptive icon) 추가와 Manifest `android:icon`·`roundIcon` 지정
   - 📋 `README.md` 작성: 프로젝트 소개, 요구 환경, 빌드·실행·테스트 명령, 서버 접속(`adb reverse`), 문서 위치
   - 📋 `lintDebug` 경고 0건 확인(남기는 경고는 사유를 README 또는 PRD §16에 기록)
